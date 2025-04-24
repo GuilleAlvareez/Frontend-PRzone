@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { HeaderIcon } from './Icons';
 
 export default function NavbarLanding() {
@@ -15,8 +16,8 @@ export default function NavbarLanding() {
             </ul>
             
             <div className='flex gap-4'>
-                <a className='cursor-pointer py-2 px-4 rounded border bg-white border-gray-300 hover:bg-gray-100'>Login</a>
-                <a className='cursor-pointer py-2 px-4 bg-black text-white rounded hover:bg-[#1c1c1c]'>Sign Up</a>
+                <Link to='/login' className='cursor-pointer py-2 px-4 rounded border bg-white border-gray-300 hover:bg-gray-100'>Login</Link>
+                <Link to='/login' className='cursor-pointer py-2 px-4 bg-black text-white rounded hover:bg-[#1c1c1c]'>Sign Up</Link>
             </div>
         </nav>
     )
