@@ -1,17 +1,19 @@
 import React, { useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
-export function LoginForm () {
-    const inputUsername = useRef();
+export function RegisterForm () {
+    const inputName = useRef();
     const inputPassword = useRef();
     const inputEmail = useRef();
+    const inputUsername = useRef();
     const navigate = useNavigate();
 
     const handleButton = async () => {
       const user = {
-        username: inputUsername.current.value,
+        name: inputName.current.value,
         password: inputPassword.current.value,
-        email: inputEmail.current.value
+        email: inputEmail.current.value,
+        username: inputUsername.current.value,
       }
 
       const response = await fetch('http://localhost:3000/register', {
@@ -30,7 +32,7 @@ export function LoginForm () {
       const data = await response.json();
       console.log("no llega")
 
-      console.log('Usuario logueado:', data);
+      console.log('Usuario registrado:', data);
       navigate('/');
     }
 
@@ -44,18 +46,23 @@ export function LoginForm () {
 
         <form className='flex flex-col'>
           <div className='flex flex-col gap-2'>
+            <label>Name:</label>
+            <input className='border border-gray-300 rounded px-3 py-2 mb-2' ref={inputName} type="text" name="name" required />
+          </div>
+
+          <div className='flex flex-col gap-2'>
             <label>Username:</label>
             <input className='border border-gray-300 rounded px-3 py-2 mb-2' ref={inputUsername} type="text" name="username" required />
           </div>
 
           <div className='flex flex-col gap-2'>
             <label>Password:</label>
-            <input className='border border-gray-300 rounded px-3 py-2 mb-2' ref={inputPassword} type="password" name="username" required />
+            <input className='border border-gray-300 rounded px-3 py-2 mb-2' ref={inputPassword} type="password" name="password" required />
           </div>
 
           <div className='flex flex-col gap-2'>
             <label>Email:</label>
-            <input className='border border-gray-300 rounded px-3 py-2 mb-2' ref={inputEmail} type="email" name="username" required />
+            <input className='border border-gray-300 rounded px-3 py-2 mb-2' ref={inputEmail} type="email" name="email" required />
           </div>
         </form>
 
@@ -64,5 +71,3 @@ export function LoginForm () {
     </div>
   );
 };
-
-export default LoginForm;
