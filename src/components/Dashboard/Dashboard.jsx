@@ -1,19 +1,20 @@
-import { useState } from "react";
+import { useContext } from "react";
 import { Header } from "./Header";
 import { NavBar } from "./NavBar";
+import { DashboardLayout } from "./DashboardLayout";
+import { SidebarContext } from "../../context/SideBarContext";
 
 export function Dashboard() {
-    const [sideBarOpen, setSideBarOpen] = useState(false);
-
-    const toggleSideBar = () => {
-        setSideBarOpen(!sideBarOpen);
-        console.log("SideBar toggled", sideBarOpen);
-    }
+    const { sideBarOpen } = useContext(SidebarContext);
 
     return (
         <div className="w-screen h-screen flex">
-            <NavBar sideBarOpen={sideBarOpen}/>
-            <Header sideBarOpen={sideBarOpen} toggleSideBar={toggleSideBar}/>
+            <NavBar />
+
+            <div className={`flex flex-col flex-1 h-full transition-all duration-300 ${sideBarOpen ? 'ml-64' : 'ml-0'}`}>
+                <Header />
+                <DashboardLayout />
+            </div>
         </div>
     )
 }
