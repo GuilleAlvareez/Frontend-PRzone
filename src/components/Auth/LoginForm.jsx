@@ -35,7 +35,7 @@ export function LoginForm() {
       
       if (response.ok) {
         console.log('Login exitoso:', data.user);
-        navigate('/');
+        navigate('/dashboard'); 
 
       } else {
         const errorMessage = data?.message || `Error: ${response.statusText || response.status}`;

@@ -52,3 +52,81 @@ export function LogOutIcon() {
         </svg>
     );
 }
+
+export function HouseIcon({width, height, className}) {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={width}
+            height={height}
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            className={className}
+            viewBox="0 0 24 24"
+        >
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+            <path d="M9 22V12h6v10"></path>
+        </svg>
+    )
+}
+
+export function Workouts({ width, height, className }) {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={width}
+            height={height}
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            className={className}
+            viewBox="0 0 24 24"
+        >
+            <path d="M11 12H3M16 6H3M16 18H3M18 9v6M21 12h-6"></path>
+        </svg>
+    );
+}
+
+export function Exercises({ width, height, className }) {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width={width}
+            height={height}
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            className={className}
+            viewBox="0 0 24 24"
+        >
+            <path d="M14.4 14.4 9.6 9.6M18.657 21.485a2 2 0 1 1-2.829-2.828l-1.767 1.768a2 2 0 1 1-2.829-2.829l6.364-6.364a2 2 0 1 1 2.829 2.829l-1.768 1.767a2 2 0 1 1 2.828 2.829zM21.5 21.5l-1.4-1.4M3.9 3.9 2.5 2.5M6.404 12.768a2 2 0 1 1-2.829-2.829l1.768-1.767a2 2 0 1 1-2.828-2.829l2.828-2.828a2 2 0 1 1 2.829 2.828l1.767-1.768a2 2 0 1 1 2.829 2.829z"></path>
+        </svg>
+    )
+}
+
+export function SideBar() {
+    return (
+        <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            fill="none"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            className="lucide lucide-panel-left"
+            viewBox="0 0 24 24"
+        >
+            <rect width="18" height="18" x="3" y="3" rx="2"></rect>
+            <path d="M9 3v18"></path>
+        </svg>
+    )
+}

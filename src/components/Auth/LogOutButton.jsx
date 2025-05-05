@@ -1,4 +1,4 @@
-import { LogOutIcon } from "./Icons";
+import { LogOutIcon } from "../Icons";
 import { useNavigate } from "react-router-dom";
 
 export function LogOutButton({ handle }) {

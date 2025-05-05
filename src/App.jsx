@@ -1,7 +1,8 @@
 import { BrowserRouter as BrowserRouter, Route, Routes } from 'react-router-dom';
-import { RegisterForm } from "./components/RegisterForm.jsx"
-import { LandingPage } from './components/LandingPage.jsx';
-import { LoginForm } from './components/LoginForm.jsx';
+import { RegisterForm } from "./components/Auth/RegisterForm.jsx"
+import { LandingPage } from './components/LandingPage/LandingPage.jsx';
+import { LoginForm } from './components/Auth/LoginForm.jsx';
+import { Dashboard } from './components/Dashboard/Dashboard.jsx';
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/register" element={<RegisterForm />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </BrowserRouter>
   )

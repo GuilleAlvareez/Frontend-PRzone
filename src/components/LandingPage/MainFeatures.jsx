@@ -1,4 +1,4 @@
-import { HeaderIcon, Graph, Calendar } from "./Icons.jsx";
+import { HeaderIcon, Graph, Calendar } from "../Icons.jsx";
 
 export function MainFeatures() {
     return (

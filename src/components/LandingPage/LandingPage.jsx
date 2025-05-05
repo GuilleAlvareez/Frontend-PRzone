@@ -2,7 +2,7 @@ import { MainFeatures } from "./MainFeatures.jsx"
 import NavbarLanding from "./NavbarLanding"
 import { PresentationContent } from "./PresentationContent"
 import { Benefits } from "./Benefits.jsx"
-import { Footer } from "./Footer.jsx"
+import { Footer } from "../Footer.jsx"
 
 export function LandingPage() {
     return ( 

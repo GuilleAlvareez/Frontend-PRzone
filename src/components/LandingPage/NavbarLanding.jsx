@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
-import { HeaderIcon } from './Icons';
+import { HeaderIcon } from '../Icons';
 import { useEffect, useState } from 'react';
-import { LogOutButton } from './LogOutButton';
+import { LogOutButton } from '../Auth/LogOutButton';
 
 export default function NavbarLanding() {
     const [user, setUser] = useState(null);

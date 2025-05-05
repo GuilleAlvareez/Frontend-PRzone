@@ -1,4 +1,4 @@
-import { Bars, Phone, Shield } from "./Icons.jsx";
+import { Bars, Phone, Shield } from "../Icons.jsx";
 
 export function Benefits() {
     return (
