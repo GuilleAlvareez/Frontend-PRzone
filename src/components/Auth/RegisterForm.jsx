@@ -28,9 +28,7 @@ export function RegisterForm () {
         throw new Error('Error al iniciar sesión');
       }
 
-      console.log(response)
       const data = await response.json();
-      console.log("no llega")
 
       console.log('Usuario registrado:', data);
       navigate('/');

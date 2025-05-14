@@ -3,7 +3,7 @@ import { RegisterForm } from "./components/Auth/RegisterForm.jsx"
 import { LandingPage } from './components/LandingPage/LandingPage.jsx';
 import { LoginForm } from './components/Auth/LoginForm.jsx';
 import { Dashboard } from './components/Dashboard/Dashboard.jsx';
-import { ExercisesPage } from './components/Dashboard/ExercisesPage.jsx';
+import { ExercisesPage } from './components/ExercisesPage/ExercisesPage.jsx';
 import { SidebarProvider } from './context/SideBarContext.jsx';
 
 function App() {

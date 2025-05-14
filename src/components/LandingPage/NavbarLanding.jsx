@@ -23,7 +23,6 @@ export default function NavbarLanding() {
             if (response.ok) {
                 const userData = await response.json();
                 setUser(userData);
-                console.log(userData);
             } else if (response.status === 401) {
                 setUser(null);
             } else {
