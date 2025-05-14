@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Link } from 'react-router-dom';
 import { HeaderIcon } from '../Icons';
 import { useEffect, useState } from 'react';

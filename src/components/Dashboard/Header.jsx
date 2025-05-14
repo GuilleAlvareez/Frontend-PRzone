@@ -1,9 +1,12 @@
-import { useContext } from "react";
+/* eslint-disable no-unused-vars */
+import { useContext, useState, useEffect } from "react";
 import { SettingsIcon, SideBar } from "../Icons";
 import { SidebarContext } from "../../context/SideBarContext";
+import { LogOutButton } from "../Auth/LogOutButton";
 
 export function Header() {
     const { toggleSideBar } = useContext(SidebarContext);
+    
 
     return (
         <div className={`w-full max-w-full h-16 flex justify-between items-center px-5 border-b border-gray-300 transition-all duration-300`}>

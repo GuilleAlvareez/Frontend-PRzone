@@ -1,7 +1,9 @@
-import { useContext } from "react";
+/* eslint-disable no-unused-vars */
+import { useContext, useEffect, useState } from "react";
 import { Exercises, HouseIcon, Workouts } from "../Icons";
 import { Link, useLocation } from 'react-router-dom';
 import { SidebarContext } from "../../context/SideBarContext";
+import { LogOutButton } from "../Auth/LogOutButton";
 
 export function NavBar() {
     const { sideBarOpen } = useContext(SidebarContext);
@@ -9,14 +11,52 @@ export function NavBar() {
     
     const isActive = (path) => location.pathname === path;
     
+    const [user, setUser] = useState(null);
+    const [error, setError] = useState(null);
+    
+    
+    const fetchUser = async () => {
+            setError(null);
+            try {
+                const response = await fetch('http://localhost:3000/api/me', {
+                    method: 'GET',
+                    headers: {
+                        // 'Content-Type': 'application/json', // Not strictly needed for simple GET
+                    },
+                    credentials: 'include'
+                });
+    
+                if (response.ok) {
+                    const userData = await response.json();
+                    setUser(userData);
+                } else if (response.status === 401) {
+                    setUser(null);
+                } else {
+                    setError(`Error ${response.status}: ${response.statusText}`);
+                    setUser(null);
+                }
+            } catch (err) {
+                console.error("Error fetching user:", err);
+                setError("No se pudo conectar con el servidor.");
+                setUser(null);
+            }
+        };
+    
+        useEffect(() => {
+            fetchUser();
+        }, []);
+    
+        const cleanUser = () => {
+            setUser(null);
+        }
     return (
         <nav className={`fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-gray-200 shadow-md transform transition-transform duration-300 ease-in-out ${sideBarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
             <div className="flex items-center justify-center h-16 border-b border-gray-200">
                 <h1 className="font-bold text-xl bg-gradient-to-r from-[#3b82f6] to-[#8b5cf6] bg-clip-text text-transparent">PRzone</h1>
             </div>
             
-            <div className="p-4">
-                <ul className="flex flex-col gap-2">
+            <div className="h-full flex flex-col gap-3 justify-between p-4">
+                <ul className="flex flex-col gap-2 flex-grow">
                     <li>
                         <Link 
                             to="/dashboard" 
@@ -71,6 +111,9 @@ export function NavBar() {
                         </Link>
                     </li>
                 </ul>
+
+                <LogOutButton handle={cleanUser}/>
+
             </div>
         </nav>
     );
