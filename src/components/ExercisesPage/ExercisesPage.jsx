@@ -32,11 +32,6 @@ export function ExercisesPage() {
     setExercises((prevExercises) => prevExercises.filter(e => e.id !== deletedId));
   };
 
-  // const filteredExercises =
-  //   filterCategory === "All"
-  //     ? exercises
-  //     : exercises.filter((exercise) => exercise.category === filterCategory);
-
   useEffect(() => {
     const fetchUser = async () => {
       const userData = await getUser();
@@ -74,7 +69,7 @@ export function ExercisesPage() {
     const { name, value, options } = e.target;
 
     if (name === "category") {
-      const selectedCategoryIds = Array.from(options).filter((opt) => opt.selected).map((opt) => parseInt(opt.value, 10)); // Convertir el ID (string) a número
+      const selectedCategoryIds = Array.from(options).filter((opt) => opt.selected).map((opt) => parseInt(opt.value, 10));
       setNewExercise((prev) => ({ ...prev, category: selectedCategoryIds }));
     } else {
       setNewExercise((prev) => ({ ...prev, [name]: value }));
@@ -96,7 +91,7 @@ export function ExercisesPage() {
       }
 
       const exercises = await response.json();
-      console.log("Exercises fetched:", exercises.results);
+      console.log("Exercises:", exercises.results);
       setExercises(exercises.results);
     } catch (error) {
       console.error("Error loading exercises:", error);

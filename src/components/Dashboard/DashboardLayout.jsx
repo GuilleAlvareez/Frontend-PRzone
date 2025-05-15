@@ -36,7 +36,7 @@ export function DashboardLayout() {
                 </div>
             </section>
 
-            {/* Recent Workouts Section */}
+            {/* Workouts Section */}
             <section className="mb-8">
                 <h2 className="text-2xl font-bold mb-4">Recent Workouts</h2>
                 <div className="bg-white rounded-lg shadow-md overflow-hidden">
