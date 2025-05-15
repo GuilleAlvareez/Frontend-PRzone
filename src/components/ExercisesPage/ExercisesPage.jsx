@@ -18,36 +18,6 @@ export function ExercisesPage() {
   const [filterCategory, setFilterCategory] = useState("All");
   const [exercises, setExercises] = useState([]);
 
-  // const exercises = [
-  //   { id: 1, name: "Bench Press", category: "Chest", visibility: "public" },
-  //   { id: 2, name: "Squat", category: "Legs", visibility: "public" },
-  //   { id: 3, name: "Deadlift", category: "Back", visibility: "public" },
-  //   { id: 4, name: "Pull-up", category: "Back", visibility: "public" },
-  //   { id: 5, name: "Push-up", category: "Chest", visibility: "public" },
-  //   {
-  //     id: 6,
-  //     name: "Shoulder Press",
-  //     category: "Shoulders",
-  //     visibility: "public",
-  //   },
-  //   { id: 7, name: "Bicep Curl", category: "Arms", visibility: "public" },
-  //   { id: 8, name: "Tricep Extension", category: "Arms", visibility: "public" },
-  //   { id: 9, name: "Leg Press", category: "Legs", visibility: "public" },
-  //   { id: 10, name: "Lat Pulldown", category: "Back", visibility: "public" },
-  //   { id: 11, name: "Leg Curl", category: "Legs", visibility: "public" },
-  //   { id: 12, name: "Chest Fly", category: "Chest", visibility: "public" },
-  // ];
-
-  // const categories = [
-  //   "All",
-  //   "Chest",
-  //   "Back",
-  //   "Legs",
-  //   "Arms",
-  //   "Shoulders",
-  //   "Other",
-  // ];
-
   const categories = [
     { id: 0, name: "All" },
   { id: 1, name: "Chest" },
@@ -56,23 +26,22 @@ export function ExercisesPage() {
   { id: 4, name: "Arms" },
   { id: 5, name: "Shoulders" },
   { id: 6, name: "Other" },
-  // ... más categorías con sus IDs
 ];
 
   const handleExerciseDeleted = (deletedId) => {
     setExercises((prevExercises) => prevExercises.filter(e => e.id !== deletedId));
   };
 
-  const filteredExercises =
-    filterCategory === "All"
-      ? exercises
-      : exercises.filter((exercise) => exercise.category === filterCategory);
+  // const filteredExercises =
+  //   filterCategory === "All"
+  //     ? exercises
+  //     : exercises.filter((exercise) => exercise.category === filterCategory);
 
   useEffect(() => {
     const fetchUser = async () => {
       const userData = await getUser();
       if (userData) {
-        setUser(userData); // Aunque ya se hace en getUser, puedes quitar esto si prefieres
+        setUser(userData);
       }
     };
 
@@ -102,52 +71,17 @@ export function ExercisesPage() {
   }
 
   const handleInputChange = async (e) => {
-    const { name, value, checked, options, type } = e.target;
+    const { name, value, options } = e.target;
 
-    if (name === "muscles") {
-      // ... (sin cambios si ya manejas IDs)
-    } else if (name === "category") {
-      const selectedCategoryIds = Array.from(options)
-        .filter((opt) => opt.selected)
-        .map((opt) => parseInt(opt.value, 10)); // Convertir el ID (string) a número
+    if (name === "category") {
+      const selectedCategoryIds = Array.from(options).filter((opt) => opt.selected).map((opt) => parseInt(opt.value, 10)); // Convertir el ID (string) a número
       setNewExercise((prev) => ({ ...prev, category: selectedCategoryIds }));
     } else {
       setNewExercise((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // const username = await getUser();
-    // if (!username) {
-    //   console.error("Error fetching user");
-    //   return;
-    // }
-
-    const exerciseToSend = {
-      ...newExercise,
-      username: user.username,
-    };
-    console.log(exerciseToSend);
-    const response = await fetch("http://localhost:3000/exercises/new", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(exerciseToSend),
-    })
-
-    if (!response.ok) {
-      throw new Error('Error al crear el ejercicio');
-    }
-
-    setNewExercise({ name: "", visibility: "private", category: [] });
-    setShowAddForm(false);
-  };
-
-  useEffect(() => {
-    const fetchExercises = async () => {
+  const fetchExercises = async () => {
     try {
       const response = await fetch("http://localhost:3000/exercises", {
         method: "GET",
@@ -162,14 +96,57 @@ export function ExercisesPage() {
       }
 
       const exercises = await response.json();
+      console.log("Exercises fetched:", exercises.results);
       setExercises(exercises.results);
     } catch (error) {
       console.error("Error loading exercises:", error);
     }
   };
 
-  fetchExercises();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!user) {
+      console.error("Error: User not found");
+      return;
+    }
 
+    try {
+      const exerciseToSend = {
+        name: newExercise.name,
+        username: user.username,
+        category: newExercise.category
+      };
+      
+      console.log("Sending exercise data:", exerciseToSend);
+      
+      const response = await fetch("http://localhost:3000/exercises/new", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(exerciseToSend),
+        credentials: "include"
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al crear el ejercicio');
+      }
+
+      const result = await response.json();
+      console.log("Exercise created:", result);
+      
+      fetchExercises();
+      
+      setNewExercise({ name: "", visibility: "private", category: [] });
+      setShowAddForm(false);
+    } catch (error) {
+      console.error("Error creating exercise:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchExercises();
   }, []);
 
   return (
@@ -199,27 +176,27 @@ export function ExercisesPage() {
             </button>
           </div>
 
-          {/* <div className="mb-6 overflow-x-auto">
+          <div className="mb-6 overflow-x-auto">
             <div className="flex space-x-2 pb-2">
               {categories.map((category) => (
                 <button
-                  key={category.name}
+                  key={category.id}
                   onClick={() => {
-                    setFilterCategory(category);
+                    setFilterCategory(category.name);
                   }}
                   className={`px-4 py-2 rounded-full whitespace-nowrap ${
-                    filterCategory === category
+                    filterCategory === category.name
                       ? "bg-purple-600 text-white"
                       : "bg-white text-gray-700 hover:bg-gray-100"
                   }`}
                 >
-                  {category}
+                  {category.name}
                 </button>
               ))}
             </div>
-          </div> */}
+          </div>
 
-          {/* Add exercise form */}
+
           {showAddForm && (
             <FormAdd
               newExercise={newExercise}
@@ -229,7 +206,6 @@ export function ExercisesPage() {
             />
           )}
 
-          {/* Exercises grid */}
           {exercises.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
               {exercises.map(({ id, nombre, visibilidad, category }) => {

@@ -3,11 +3,13 @@ import { Link } from 'react-router-dom';
 import { HeaderIcon } from '../Icons';
 import { useEffect, useState } from 'react';
 import { LogOutButton } from '../Auth/LogOutButton';
+import { useNavigate } from 'react-router-dom';
 
 export default function NavbarLanding() {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const navigate = useNavigate();
 
     const fetchUser = async () => {
         setLoading(true);
@@ -22,8 +24,7 @@ export default function NavbarLanding() {
             });
 
             if (response.ok) {
-                const userData = await response.json();
-                setUser(userData);
+                navigate('/dashboard');
             } else if (response.status === 401) {
                 setUser(null);
             } else {
