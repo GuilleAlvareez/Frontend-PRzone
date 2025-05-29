@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect } from "react";
+import { useContext, useState, useEffect, useMemo } from "react";
 import { SidebarContext } from "../../context/SideBarContext";
 import { NavBar } from "../Dashboard/NavBar";
 import { Header } from "../Dashboard/Header";
@@ -20,12 +20,12 @@ export function ExercisesPage() {
 
   const categories = [
     { id: 0, name: "All" },
-  { id: 1, name: "Chest" },
-  { id: 2, name: "Back" },
-  { id: 3, name: "Legs" },
-  { id: 4, name: "Arms" },
-  { id: 5, name: "Shoulders" },
-  { id: 6, name: "Other" },
+    { id: 1, name: "Chest" },
+    { id: 2, name: "Back" },
+    { id: 3, name: "Legs" },
+    { id: 4, name: "Arms" },
+    { id: 5, name: "Shoulders" },
+    { id: 6, name: "Other" },
 ];
 
   const handleExerciseDeleted = (deletedId) => {
@@ -35,6 +35,7 @@ export function ExercisesPage() {
   useEffect(() => {
     const fetchUser = async () => {
       const userData = await getUser();
+      console.log(userData);
       if (userData) {
         setUser(userData);
       }
@@ -144,6 +145,36 @@ export function ExercisesPage() {
     fetchExercises();
   }, []);
 
+  const filteredExercises = useMemo(() => {
+    if (filterCategory === "All") {
+      return exercises;
+    }
+    
+    // Filtrar ejercicios que contengan la categoría seleccionada
+    return exercises.filter(exercise => {
+      // Verificar si exercise.category existe y tiene datos
+      if (!exercise.category || !Array.isArray(exercise.category) || exercise.category.length === 0) {
+        return false;
+      }
+      
+      // Buscar si alguna categoría coincide con el filtro seleccionado
+      return exercise.category.some(categoryGroup => {
+        // Si es un array anidado (como parece ser el caso según el error)
+        if (Array.isArray(categoryGroup)) {
+          return categoryGroup.some(muscle => 
+            muscle.nombre === filterCategory || muscle.name === filterCategory
+          );
+        } 
+        // Si es un objeto directo
+        else if (typeof categoryGroup === 'object') {
+          return categoryGroup.nombre === filterCategory || categoryGroup.name === filterCategory;
+        }
+        // Si es solo un string o número
+        return categoryGroup === filterCategory;
+      });
+    });
+  }, [exercises, filterCategory]);
+
   return (
     <div className="w-screen h-screen flex">
       <NavBar sideBarOpen={sideBarOpen} />
@@ -182,7 +213,7 @@ export function ExercisesPage() {
                   className={`px-4 py-2 rounded-full whitespace-nowrap ${
                     filterCategory === category.name
                       ? "bg-purple-600 text-white"
-                      : "bg-white text-gray-700 hover:bg-gray-100"
+                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                   }`}
                 >
                   {category.name}
@@ -203,7 +234,7 @@ export function ExercisesPage() {
 
           {exercises.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-              {exercises.map(({ id, nombre, visibilidad, category }) => {
+              {filteredExercises.map(({ id, nombre, visibilidad, category }) => {
                 return (
                   <CardExercises
                     key={id}

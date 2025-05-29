@@ -23,36 +23,32 @@ export function CardExercises({ id, name, visibility, category, user, onDelete }
   return (
     <div
       key={id}
-      className="bg-white flex flex-col justify-between rounded-lg shadow-sm hover:shadow-md p-5 transition-all duration-200 border border-gray-100 h-full"
+      className="bg-white dark:bg-gray-800 flex flex-col justify-between rounded-lg shadow-sm hover:shadow-md p-5 transition-all duration-200 border border-gray-100 dark:border-gray-700 h-full"
     >
       <div className="flex-1">
         <div className="flex justify-between items-start mb-3">
-          <h3 className="font-semibold text-lg">{name}</h3>
+          <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{name}</h3>
           <span
             className={`text-xs px-2 py-1 rounded-full ${
               visibility === "public"
-                ? "bg-green-100 text-green-800"
-                : "bg-gray-100 text-gray-800"
+                ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
             }`}
           >
             {visibility}
           </span>
         </div>
         
-        {/* Mostrar categoría principal */}
-        {/* <div className="flex items-center gap-2 mb-2">
-          <span className="inline-block w-2 h-2 rounded-full bg-purple-500"></span>
-          <p className="text-gray-600 text-sm">Hola</p>
-        </div> */}
-        
         {/* Mostrar músculos trabajados */}
         {category && category.length > 0 && (
           <div className="mb-4">
             <div className="flex flex-wrap gap-2 items-start">
-              {category[0].flat().map((muscle, index) => (
-                <div key={`${muscle.id}-${index}`} className="flex items-center gap-1.5 mr-1">
-                  <span className="inline-block w-2 h-2 rounded-full bg-purple-500 "></span>
-                  <p className="text-gray-600 text-sm m-0">{muscle.nombre}</p>
+              {category.map((muscle, index) => (
+                <div key={`${muscle.id || index}`} className="flex items-center gap-1.5 mr-1">
+                  <span className="inline-block w-2 h-2 rounded-full bg-purple-500"></span>
+                  <p className="text-gray-600 dark:text-gray-300 text-sm m-0">
+                    {muscle.nombre || muscle.name}
+                  </p>
                 </div>
               ))}
             </div>
@@ -61,18 +57,18 @@ export function CardExercises({ id, name, visibility, category, user, onDelete }
       </div>
       
       
-      <div className="flex justify-between items-center pt-2 border-t border-gray-100 mt-auto">
+      <div className="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-700 mt-auto">
         {user && user.admin === 1 ? (
           <div className="flex gap-3">
-            <button className="text-sm text-gray-500 hover:text-blue-700">
+            <button className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-700 dark:hover:text-blue-300">
               Edit
             </button>
-            <button onClick={handleDelete} className="text-sm text-gray-500 hover:text-rose-700">
+            <button onClick={handleDelete} className="text-sm text-gray-500 dark:text-gray-400 hover:text-rose-700 dark:hover:text-rose-300">
               Delete
             </button>
           </div>
         ) : <div></div>}
-        <button className="text-sm text-purple-600 hover:text-purple-800 font-medium">
+        <button className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium">
           View Details
         </button>
       </div>
