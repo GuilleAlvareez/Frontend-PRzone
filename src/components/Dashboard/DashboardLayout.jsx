@@ -1,12 +1,19 @@
 import { useEffect, useState } from "react";
 import { RecentWorkoutCard } from "./RecentWorkoutCard";
+import { CardMostUsed } from "./CardMostUsed";
 
 export function DashboardLayout() {
     const [workouts, setWorkouts] = useState([]);
     const [exercises, setExercises] = useState([]);
+    const [mostUsedExercises, setMostUsedExercises] = useState([]);
     const [totalWeight, setTotalWeight] = useState(0);
     const [user, setUser] = useState(null);
     const [streak, setStreak] = useState(0);
+    const colorsCard = [
+        "border-blue-500",
+        "border-purple-500",
+        "border-green-500",
+    ]
 
     useEffect(() => {
         const fetchWorkouts = async () => {
@@ -72,7 +79,26 @@ export function DashboardLayout() {
             }
         }
 
-        const fetchStreak = async () => {
+        
+
+        fetchUser();
+        fetchWorkouts();
+        fetchExercises();
+    }, []);
+
+    useEffect(() => {
+        const calculateTotal = async () => {
+            const total = await totalWeightLifted();
+            setTotalWeight(total);
+        };
+
+        if (workouts.length > 0) {
+            calculateTotal();
+        }
+    }, [workouts]);
+
+    useEffect(() => {
+        const fetchStreak = async (user) => {
             try {
                 const response = await fetch(`http://localhost:3000/dias-consecutivos/${user.id}`, {
                     method: "GET",
@@ -93,22 +119,36 @@ export function DashboardLayout() {
             }
         }
 
-        fetchUser();
-        fetchWorkouts();
-        fetchExercises();
-        fetchStreak();
-    }, []);
+        const fetchMostUsedExercises = async (user) => {
+            try {
+                const response = await fetch(`http://localhost:3000/exercises/mostused/${user.id}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    credentials: "include",
+                });
 
-    useEffect(() => {
-        const calculateTotal = async () => {
-            const total = await totalWeightLifted();
-            setTotalWeight(total);
-        };
+                if (!response.ok) {
+                    throw new Error("Error fetching most used exercises");
+                }
 
-        if (workouts.length > 0) {
-            calculateTotal();
+                const data = await response.json();
+                setMostUsedExercises(data);
+            } catch (error) {
+                console.error("Error fetching most used exercises:", error);
+            }
         }
-    }, [workouts]);
+
+        if (user) {
+            fetchStreak(user)
+            fetchMostUsedExercises(user);
+        } else {
+            // Si el usuario es null (ej. no logueado o error al obtenerlo),
+            // podrías querer resetear el streak.
+            setStreak(0)
+        }
+    }, [user]);
 
     const fetchExercisesWorkout = async (id) => {
         try {
@@ -200,21 +240,9 @@ export function DashboardLayout() {
             <section>
                 <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Most Used Exercises</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border-l-4 border-blue-500 transition-transform duration-300 hover:scale-105">
-                        <h3 className="font-semibold">Bench Press</h3>
-                        <p className="text-gray-600">Used in 18 workouts</p>
-                        <p className="text-sm text-gray-500 mt-2">Last PR: 100kg × 5 reps</p>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border-l-4 border-purple-500 transition-transform duration-300 hover:scale-105">
-                        <h3 className="font-semibold">Squat</h3>
-                        <p className="text-gray-600">Used in 15 workouts</p>
-                        <p className="text-sm text-gray-500 mt-2">Last PR: 140kg × 3 reps</p>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 border-l-4 border-green-500 transition-transform duration-300 hover:scale-105">
-                        <h3 className="font-semibold">Deadlift</h3>
-                        <p className="text-gray-600">Used in 12 workouts</p>
-                        <p className="text-sm text-gray-500 mt-2">Last PR: 160kg × 1 rep</p>
-                    </div>
+                    {mostUsedExercises.map((exercise, index) => (
+                        <CardMostUsed key={exercise.ejercicio} ejercicio={exercise.ejercicio} veces_realizado={exercise.veces_realizado} color={colorsCard[index]} />
+                    ))}
                 </div>
             </section>
         </div>
