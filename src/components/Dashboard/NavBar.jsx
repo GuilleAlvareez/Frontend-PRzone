@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useContext, useEffect, useState } from "react";
-import { Exercises, HouseIcon, Workouts } from "../Icons";
+import { Exercises, HouseIcon, Workouts, Graph } from "../Icons";
 import { Link, useLocation } from 'react-router-dom';
 import { SidebarContext } from "../../context/SideBarContext";
 import { LogOutButton } from "../Auth/LogOutButton";
@@ -90,6 +90,24 @@ export function NavBar() {
                                 className="text-purple-500" 
                             />
                             <span className="font-medium">Exercises</span>
+                        </Link>
+                    </li>
+
+                    <li>
+                        <Link 
+                            to="/progress" 
+                            className={`flex items-center gap-3 px-4 py-3 rounded-lg ${
+                                isActive('/progress') 
+                                    ? 'bg-green-100 text-green-600' 
+                                    : 'text-gray-700 hover:bg-gray-100'
+                            }`}
+                        >
+                            <Graph 
+                                width="20" 
+                                height="20" 
+                                className="text-green-500" 
+                            />
+                            <span className="font-medium">Progress</span>
                         </Link>
                     </li>
 

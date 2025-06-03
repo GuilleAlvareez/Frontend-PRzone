@@ -6,6 +6,7 @@ import { Dashboard } from './components/Dashboard/Dashboard.jsx';
 import { ExercisesPage } from './components/ExercisesPage/ExercisesPage.jsx';
 import { SidebarProvider } from './context/SideBarContext.jsx';
 import { WorkoutsPage } from './components/WorkoutsPage/WorkoutsPage.jsx';
+import { ProgressPage } from './components/ProgressPage/ProgressPage.jsx';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/exercises" element={<ExercisesPage />} />
           <Route path="/workouts" element={<WorkoutsPage />} />
+          <Route path="/progress" element={<ProgressPage />} />
         </Routes>
       </BrowserRouter>
     </SidebarProvider>
