@@ -1,5 +1,5 @@
 .range-switcher-chart-wrapper {
-    background-color: #ffffff; /* Fondo negro general para el componente */
+    background-color: transparent; /* Fondo negro general para el componente */
     color: #d1d4dc; /* Color de texto claro */
     padding: 20px;
     border-radius: 8px;
@@ -67,4 +67,9 @@
     height: 400px; /* Ajusta la altura según tus necesidades */
     border-radius: 4px; /* Bordes redondeados para el contenedor del chart */
     overflow: hidden; /* Para que el chart respete los bordes redondeados */
+}
+
+.tv-lightweight-charts svg,
+.tv-lightweight-charts a {
+    display: none;
 }

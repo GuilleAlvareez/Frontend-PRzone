@@ -82,16 +82,22 @@ export function WorkoutDetails({ workout, onClose }) {
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Weight</th>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Sets</th>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Reps</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Est. 1RM</th>
                       <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Notes</th>
                     </tr>
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {workout.ejercicios.map((exercise) => (
                       <tr key={exercise.id}>
-                        <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-900">{exercise.nombre}</td>
+                        <td className="px-4 py-2 whitespace-nowrap text-sm font-medium text-gray-500">
+                          {exercise.nombre || exercise.ejercicio_nombre}
+                        </td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{exercise.peso} kg</td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{exercise.series}</td>
                         <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">{exercise.repeticiones}</td>
+                        <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-500">
+                          {exercise.rm_estimado ? `${exercise.rm_estimado} kg` : '-'}
+                        </td>
                         <td className="px-4 py-2 text-sm text-gray-500">{exercise.observaciones || "-"}</td>
                       </tr>
                     ))}

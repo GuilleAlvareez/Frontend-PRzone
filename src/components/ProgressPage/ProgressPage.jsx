@@ -3,47 +3,19 @@ import { SidebarContext } from "../../context/SideBarContext";
 import { NavBar } from "../Dashboard/NavBar";
 import { Header } from "../Dashboard/Header";
 import ChartComponent from "./ChartComponent";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function ProgressPage() {
   const { sideBarOpen, toggleSideBar } = useContext(SidebarContext);
-  const [user, setUser] = useState(null);
   const [exerciseData, setExerciseData] = useState([]);
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [exercises, setExercises] = useState([]);
-
-  const initialData = [
-    { time: '2018-12-22', value: 32.51 },
-    { time: '2018-12-23', value: 31.11 },
-    { time: '2018-12-24', value: 27.02 },
-    { time: '2018-12-25', value: 27.32 },
-    { time: '2018-12-26', value: 25.17 },
-    { time: '2018-12-27', value: 28.89 },
-    { time: '2018-12-28', value: 25.46 },
-    { time: '2018-12-29', value: 23.92 },
-    { time: '2018-12-30', value: 22.68 },
-    { time: '2018-12-31', value: 22.67 },
-];
-
-  // Fetch user data
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/api/me", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        });
-
-        if (!response.ok) throw new Error("Error fetching user");
-        const data = await response.json();
-        setUser(data.user);
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      }
-    };
-
-    fetchUser();
-  }, []);
 
   // Fetch exercises
   useEffect(() => {
@@ -69,6 +41,28 @@ export function ProgressPage() {
     fetchExercises();
   }, []);
 
+  const fetchingExerciseSelected = async (nameExercise) => {
+    const response = await fetch(`http://localhost:3000/exercises/progress/${nameExercise}`, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
+
+    if (!response.ok) throw new Error("Error fetching exercise progress");
+    const data = await response.json();
+    setExerciseData(data);
+  };
+
+  useEffect(() => {
+    if (selectedExercise) {
+      fetchingExerciseSelected(selectedExercise);
+    }
+  }, [selectedExercise]);
+
+  const handleChange = (value) => {
+    console.log("Selected exercise:", value);
+    setSelectedExercise(value);
+  };
 
   return (
     <div className="w-screen h-screen flex bg-white dark:bg-gray-900">
@@ -95,10 +89,22 @@ export function ProgressPage() {
             <label htmlFor="exercise-select" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Select Exercise
             </label>
-            <select
+            <Select onValueChange={handleChange} value={selectedExercise}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select a exercise" />
+              </SelectTrigger>
+              <SelectContent>
+                {exercises.map((exercise) => (
+                <SelectItem key={exercise.id} value={exercise.id}>
+                  {exercise.nombre}
+                </SelectItem>
+              ))}
+              </SelectContent>
+            </Select>
+            {/* <select
               id="exercise-select"
               value={selectedExercise || ""}
-              onChange={(e) => setSelectedExercise(e.target.value)}
+              onChange={handleChange}
               className="w-full md:w-64 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               {exercises.map((exercise) => (
@@ -106,12 +112,13 @@ export function ProgressPage() {
                   {exercise.nombre}
                 </option>
               ))}
-            </select>
+            </select> */}
           </div>
 
-            <ChartComponent data={initialData} />
+            <ChartComponent data={exerciseData} />
         </div>
       </div>
     </div>
   );
 }
+

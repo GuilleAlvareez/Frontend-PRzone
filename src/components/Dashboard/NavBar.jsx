@@ -98,14 +98,14 @@ export function NavBar() {
                             to="/progress" 
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg ${
                                 isActive('/progress') 
-                                    ? 'bg-green-100 text-green-600' 
+                                    ? 'bg-rose-100 text-rose-600' 
                                     : 'text-gray-700 hover:bg-gray-100'
                             }`}
                         >
                             <Graph 
                                 width="20" 
                                 height="20" 
-                                className="text-green-500" 
+                                className="text-rose-500" 
                             />
                             <span className="font-medium">Progress</span>
                         </Link>
