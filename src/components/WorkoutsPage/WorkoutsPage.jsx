@@ -9,110 +9,125 @@ export function WorkoutsPage() {
   const { sideBarOpen, toggleSideBar } = useContext(SidebarContext);
   const [showAddForm, setShowAddForm] = useState(false);
   const [workouts, setWorkouts] = useState([]);
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(null); // Inicialmente null hasta que se cargue
   const [exercises, setExercises] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Inicia en true para mostrar carga inicialmente
   const [error, setError] = useState(null);
 
-  // Obtener usuario actual
+  // 1. Obtener el usuario actual al montar el componente
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserData = async () => {
       const userData = await getUser();
-
       if (userData) {
         setUser(userData);
+      } else {
+        setError("Failed to load user data.");
+        setLoading(false);
       }
     };
 
-    fetchUser();
+    fetchUserData();
   }, []);
 
   const getUser = async () => {
     try {
       const response = await fetch("http://localhost:3000/api/me", {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
-
       if (response.ok) {
         const userData = await response.json();
         return userData.user;
       } else {
-        throw new Error("Error fetching user");
+        console.error("Error fetching user, status:", response.status);
+        return null;
       }
     } catch (error) {
       console.error("Error fetching user:", error);
       return null;
     }
-  }
+  };
 
-  // Obtener entrenamientos
+  // 2. Funciones para obtener datos que dependen del usuario
   const fetchWorkouts = async () => {
+    // IMPRESCINDIBLE: No intentar cargar workouts si no hay usuario o ID de usuario
+    if (!user || !user.id) {
+      setWorkouts([]); // Limpiar workouts si no hay usuario
+      setLoading(false); // Detener la carga si no podemos continuar
+      return;
+    }
+
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:3000/workouts", {
+      setError(null);
+      const response = await fetch(`http://localhost:3000/workouts/${user.id}`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error("Error fetching workouts");
+        throw new Error(`Error fetching workouts: ${response.status}`);
       }
 
       const data = await response.json();
       setWorkouts(data.results || []);
-    } catch (error) {
-      console.error("Error loading workouts:", error);
-      setError("Failed to load workouts");
+    } catch (err) {
+      console.error("Error loading workouts:", err);
+      setError(err.message || "Failed to load workouts");
+      setWorkouts([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Obtener ejercicios disponibles para el formulario
   const fetchExercises = async () => {
+    // No intentar cargar ejercicios si no hay usuario o nombre de usuario
+    if (!user || !user.name) { 
+      setExercises([]);
+      return;
+    }
+
     try {
-      const response = await fetch("http://localhost:3000/exercises", {
+      const response = await fetch(`http://localhost:3000/exercises/${user.name}`, { 
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error("Error fetching exercises");
+        throw new Error(`Error fetching exercises: ${response.status}`);
       }
 
       const data = await response.json();
       setExercises(data.results || []);
-    } catch (error) {
-      console.error("Error loading exercises:", error);
+    } catch (err) {
+      console.error("Error loading exercises:", err);
+      setExercises([]);
     }
   };
 
+  // 3. useEffect para cargar datos dependientes del usuario (workouts y exercises)
   useEffect(() => {
-    fetchWorkouts();
-    fetchExercises();
-  }, []);
+    if (user) { // Solo proceder si 'user' tiene un valor
+      fetchWorkouts();
+      fetchExercises();
+    } else {
+      setWorkouts([]);
+      setExercises([]);
+    }
+  }, [user]); // La dependencia [user] es la clave aquí
 
-  // Manejar la creación de un nuevo entrenamiento
   const handleWorkoutCreated = () => {
-    fetchWorkouts();
+    fetchWorkouts(); // Recargar la lista de workouts después de crear uno nuevo
     setShowAddForm(false);
   };
 
-  // Manejar la eliminación de un entrenamiento
-  const handleWorkoutDeleted = (deletedId) => {
-    setWorkouts(workouts.filter(workout => workout.id !== deletedId));
+  const handleWorkoutDeleted = () => {
+    fetchWorkouts()
   };
-
+  
   return (
     <div className="w-screen h-screen flex bg-white dark:bg-gray-900">
       <NavBar />

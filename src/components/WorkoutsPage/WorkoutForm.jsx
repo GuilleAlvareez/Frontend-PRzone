@@ -12,11 +12,13 @@ export function WorkoutForm({ onWorkoutCreated, exercises, user }) {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Maneja cambios en los inputs generales del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
     setWorkout({ ...workout, [name]: value });
   };
 
+  // Maneja cambios en los campos de los ejercicios
   const handleExerciseChange = (index, e) => {
     const { name, value } = e.target;
     const newExercises = [...workout.ejercicios];
@@ -24,6 +26,7 @@ export function WorkoutForm({ onWorkoutCreated, exercises, user }) {
     setWorkout({ ...workout, ejercicios: newExercises });
   };
 
+  // Añade un nuevo campo de ejercicio al formulario
   const addExercise = () => {
     setWorkout({
       ...workout,
@@ -34,16 +37,19 @@ export function WorkoutForm({ onWorkoutCreated, exercises, user }) {
     });
   };
 
+  // Elimina un ejercicio del formulario (si hay más de uno)
   const removeExercise = (index) => {
-    if (workout.ejercicios.length === 1) {
-      return; // Mantener al menos un ejercicio
-    }
-    
+    if (workout.ejercicios.length === 1) return;
+
+    //Crea copia ejercicios
     const newExercises = [...workout.ejercicios];
+    // ELimina el ejercicio en el índice especificado
     newExercises.splice(index, 1);
+    // Actualiza el estado con los ejercicios actualizados
     setWorkout({ ...workout, ejercicios: newExercises });
   };
 
+  // Valida el formulario antes de enviarlo
   const validateForm = () => {
     const newErrors = {};
     
@@ -54,89 +60,66 @@ export function WorkoutForm({ onWorkoutCreated, exercises, user }) {
     if (!workout.fecha) {
       newErrors.fecha = "Date is required";
     }
-    
-    // Validar ejercicios
+
+    // Validar que cada ejercicio tenga datos válidos
     const exerciseErrors = [];
     workout.ejercicios.forEach((exercise, index) => {
       const exerciseError = {};
-      
-      if (!exercise.nombre_id) {
-        exerciseError.nombre_id = "Exercise is required";
-      }
-      
-      if (!exercise.peso) {
-        exerciseError.peso = "Weight is required";
-      }
-      
-      if (!exercise.series) {
-        exerciseError.series = "Sets are required";
-      }
-      
-      if (!exercise.repeticiones) {
-        exerciseError.repeticiones = "Reps are required";
-      }
-      
+      if (!exercise.nombre_id) exerciseError.nombre_id = "Exercise is required";
+      if (!exercise.peso) exerciseError.peso = "Weight is required";
+      if (!exercise.series) exerciseError.series = "Sets are required";
+      if (!exercise.repeticiones) exerciseError.repeticiones = "Reps are required";
       if (Object.keys(exerciseError).length > 0) {
         exerciseErrors[index] = exerciseError;
       }
     });
-    
+
     if (exerciseErrors.length > 0) {
       newErrors.ejercicios = exerciseErrors;
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!validateForm()) {
-      return;
-    }
+
+    if (!validateForm()) return;
 
     setIsSubmitting(true);
-    
+
     try {
-      // Preparar datos para enviar
       const workoutData = {
         ...workout,
-        usuarioId: user?.id, // Usar ID del usuario
+        usuarioId: user?.id,
         numeroEjercicios: workout.ejercicios.length
       };
-      
-      // Verificar que tenemos un ID de usuario
+
       if (!workoutData.usuarioId) {
         throw new Error("User ID is required. Please log in again.");
       }
-      
+
       console.log("Enviando datos de entrenamiento:", workoutData);
-      
+
       const response = await fetch("http://localhost:3000/workouts/new", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(workoutData),
         credentials: "include",
       });
-      
-      // Leer la respuesta incluso si hay error para ver el mensaje
+
       const responseData = await response.json();
       console.log("Respuesta del servidor:", responseData);
-      
+
       if (!response.ok) {
         throw new Error(responseData.message || "Error creating workout");
       }
-      
-      // Notificar éxito
-      alert("Entrenamiento creado con éxito!");
-      
-      // Llamar al callback
+
+      // Llamar a función padre para actualizar lista de entrenamientos
       onWorkoutCreated();
-      
-      // Resetear formulario
+
+      // Resetear el formulario
       setWorkout({
         nombre: "",
         fecha: new Date().toISOString().split("T")[0],
@@ -144,7 +127,7 @@ export function WorkoutForm({ onWorkoutCreated, exercises, user }) {
         comentarios: "",
         ejercicios: [{ nombre_id: "", peso: "", series: "", repeticiones: "", observaciones: "" }]
       });
-      
+
     } catch (error) {
       console.error("Error creating workout:", error);
       setErrors({ submit: error.message || "Failed to create workout. Please try again." });
@@ -152,6 +135,7 @@ export function WorkoutForm({ onWorkoutCreated, exercises, user }) {
       setIsSubmitting(false);
     }
   };
+
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6 border border-gray-100 dark:border-gray-700">

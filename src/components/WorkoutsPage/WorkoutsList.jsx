@@ -4,10 +4,11 @@ import { WorkoutDetails } from "./WorkoutDetails";
 
 export function WorkoutsList({ workouts, onDelete, user }) {
   const [selectedWorkout, setSelectedWorkout] = useState(null);
+  console.log("WorkoutsList: ", selectedWorkout);
 
   const handleViewDetails = async (workoutId) => {
     try {
-      const response = await fetch(`http://localhost:3000/workouts/${workoutId}`, {
+      const response = await fetch(`http://localhost:3000/workouts/details/${workoutId}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

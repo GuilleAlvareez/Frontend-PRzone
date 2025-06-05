@@ -16,9 +16,35 @@ export function DashboardLayout() {
     ]
 
     useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const response = await fetch("http://localhost:3000/api/me", {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    credentials: "include",
+                });
+
+                if (!response.ok) {
+                    throw new Error("Error fetching user");
+                }
+
+                const data = await response.json();
+                setUser(data.user);
+            } catch (error) {
+                console.error("Error fetching user:", error);
+            }
+        };
+
+        fetchUser();
+    }, []);
+
+
+    useEffect(() => {
         const fetchWorkouts = async () => {
             try {
-                const response = await fetch("http://localhost:3000/recentworkouts", {
+                const response = await fetch(`http://localhost:3000/recentworkouts/${user.id}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -39,7 +65,7 @@ export function DashboardLayout() {
 
         const fetchExercises = async () => {
             try {
-                const response = await fetch("http://localhost:3000/exercises", {
+                const response = await fetch(`http://localhost:3000/exercises/${user.id}`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -58,44 +84,20 @@ export function DashboardLayout() {
             }
         }
 
-        const fetchUser = async () => {
-            try {
-                const response = await fetch("http://localhost:3000/api/me", {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    credentials: "include",
-                });
-
-                if (!response.ok) {
-                    throw new Error("Error fetching user");
-                }
-
-                const data = await response.json();
-                setUser(data.user);
-            } catch (error) {
-                console.error("Error fetching user:", error);
-            }
-        }
-
         
-
-        fetchUser();
-        fetchWorkouts();
-        fetchExercises();
-    }, []);
-
-    useEffect(() => {
         const calculateTotal = async () => {
             const total = await totalWeightLifted();
             setTotalWeight(total);
         };
 
+        fetchWorkouts();
+        fetchExercises();
+
         if (workouts.length > 0) {
             calculateTotal();
         }
-    }, [workouts]);
+    }, [user]);
+
 
     useEffect(() => {
         const fetchStreak = async (user) => {

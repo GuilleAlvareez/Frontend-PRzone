@@ -16,12 +16,45 @@ export function ProgressPage() {
   const [exerciseData, setExerciseData] = useState([]);
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [exercises, setExercises] = useState([]);
+  const [user, setUser] = useState(null);
+
+  const getUser = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/me", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        const userData = await response.json();
+        return userData.user;
+      } else {
+        throw new Error("Error fetching user");
+      }
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const userData = await getUser();
+      setUser(userData);
+    };
+    fetchUserData();
+  }, []);
 
   // Fetch exercises
   useEffect(() => {
+    if (!user) return;
+
     const fetchExercises = async () => {
       try {
-        const response = await fetch("http://localhost:3000/exercises", {
+        const response = await fetch(`http://localhost:3000/exercises/${user.username}`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
@@ -39,7 +72,7 @@ export function ProgressPage() {
     };
 
     fetchExercises();
-  }, []);
+  }, [user]);
 
   const fetchingExerciseSelected = async (nameExercise) => {
     const response = await fetch(`http://localhost:3000/exercises/progress/${nameExercise}`, {
@@ -60,7 +93,6 @@ export function ProgressPage() {
   }, [selectedExercise]);
 
   const handleChange = (value) => {
-    console.log("Selected exercise:", value);
     setSelectedExercise(value);
   };
 

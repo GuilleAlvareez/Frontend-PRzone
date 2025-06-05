@@ -26,23 +26,11 @@ export function ExercisesPage() {
     { id: 4, name: "Arms" },
     { id: 5, name: "Shoulders" },
     { id: 6, name: "Other" },
-];
+  ];
 
   const handleExerciseDeleted = (deletedId) => {
     setExercises((prevExercises) => prevExercises.filter(e => e.id !== deletedId));
   };
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      const userData = await getUser();
-      console.log(userData);
-      if (userData) {
-        setUser(userData);
-      }
-    };
-
-    fetchUser();
-  }, []);
 
   const getUser = async () => {
     try {
@@ -64,22 +52,23 @@ export function ExercisesPage() {
       console.error("Error fetching user:", error);
       return null;
     }
-  }
-
-  const handleInputChange = async (e) => {
-    const { name, value, options } = e.target;
-
-    if (name === "category") {
-      const selectedCategoryIds = Array.from(options).filter((opt) => opt.selected).map((opt) => parseInt(opt.value, 10));
-      setNewExercise((prev) => ({ ...prev, category: selectedCategoryIds }));
-    } else {
-      setNewExercise((prev) => ({ ...prev, [name]: value }));
-    }
   };
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const userData = await getUser();
+      setUser(userData);
+    };
+    fetchUserData();
+  }, []);
+
   const fetchExercises = async () => {
+    if (!user || !user.id) { // Imprescindible: Evitar llamar si user no está listo
+      setExercises([]); // Opcional: limpiar ejercicios si no hay usuario
+      return;
+    }
     try {
-      const response = await fetch("http://localhost:3000/exercises", {
+      const response = await fetch(`http://localhost:3000/exercises/${user.name}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -91,22 +80,34 @@ export function ExercisesPage() {
         throw new Error("Error fetching exercises");
       }
 
-      const exercises = await response.json();
-      console.log("Exercises:", exercises.results);
-      setExercises(exercises.results);
+      const exercisesData = await response.json();
+      setExercises(exercisesData.results || []);
     } catch (error) {
       console.error("Error loading exercises:", error);
+      setExercises([]); // En caso de error, establece un array vacío
+    }
+  };
+
+  useEffect(() => {
+    fetchExercises();
+  }, [user]); // Dependencia: Ejecutar cuando 'user' cambie
+
+  const handleInputChange = async (e) => {
+    const { name, value, options } = e.target;
+    if (name === "category") {
+      const selectedCategoryIds = Array.from(options).filter((opt) => opt.selected).map((opt) => parseInt(opt.value, 10));
+      setNewExercise((prev) => ({ ...prev, category: selectedCategoryIds }));
+    } else {
+      setNewExercise((prev) => ({ ...prev, [name]: value }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!user) {
       console.error("Error: User not found");
       return;
     }
-
     try {
       const exerciseToSend = {
         name: newExercise.name,
@@ -114,26 +115,18 @@ export function ExercisesPage() {
         category: newExercise.category
       };
       
-      console.log("Sending exercise data:", exerciseToSend);
-      
       const response = await fetch("http://localhost:3000/exercises/new", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(exerciseToSend),
         credentials: "include"
       });
 
-      if (!response.ok) {
-        throw new Error('Error al crear el ejercicio');
-      }
+      if (!response.ok) throw new Error('Error al crear el ejercicio');
 
-      const result = await response.json();
-      console.log("Exercise created:", result);
+      await response.json(); // Procesar respuesta si es necesario
       
-      fetchExercises();
-      
+      fetchExercises(); // Recargar ejercicios
       setNewExercise({ name: "", visibility: "private", category: [] });
       setShowAddForm(false);
     } catch (error) {
@@ -141,39 +134,26 @@ export function ExercisesPage() {
     }
   };
 
-  useEffect(() => {
-    fetchExercises();
-  }, []);
-
   const filteredExercises = useMemo(() => {
-    if (filterCategory === "All") {
-      return exercises;
-    }
+    if (filterCategory === "All") return exercises;
     
-    // Filtrar ejercicios que contengan la categoría seleccionada
     return exercises.filter(exercise => {
-      // Verificar si exercise.category existe y tiene datos
       if (!exercise.category || !Array.isArray(exercise.category) || exercise.category.length === 0) {
         return false;
       }
-      
-      // Buscar si alguna categoría coincide con el filtro seleccionado
       return exercise.category.some(categoryGroup => {
-        // Si es un array anidado (como parece ser el caso según el error)
         if (Array.isArray(categoryGroup)) {
           return categoryGroup.some(muscle => 
             muscle.nombre === filterCategory || muscle.name === filterCategory
           );
-        } 
-        // Si es un objeto directo
-        else if (typeof categoryGroup === 'object') {
+        } else if (typeof categoryGroup === 'object') {
           return categoryGroup.nombre === filterCategory || categoryGroup.name === filterCategory;
         }
-        // Si es solo un string o número
         return categoryGroup === filterCategory;
       });
     });
   }, [exercises, filterCategory]);
+
 
   return (
     <div className="w-screen h-screen flex">

@@ -12,9 +12,6 @@ const ChartComponent = ({ data }) => {
     value: parseFloat(item.rm_estimado) // convertimos a número decimal
   }));
 
-  console.log("Original data:", data);
-  console.log("Transformed data:", transformedData);
-
   useEffect(() => {
     if (!chartContainerRef.current || chartRef.current) return;
 
@@ -101,7 +98,6 @@ const ChartComponent = ({ data }) => {
       value: parseFloat(item.rm_estimado),
     }));
 
-    console.log("Transformed data:", transformedData);
     seriesRef.current.setData(transformedData);
   }, [data]);
 
