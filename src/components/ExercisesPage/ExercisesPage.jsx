@@ -191,7 +191,7 @@ export function ExercisesPage() {
   };
 
   return (
-    <div className="w-screen h-screen flex">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
       <NavBar sideBarOpen={sideBarOpen} />
 
       <div
@@ -201,11 +201,11 @@ export function ExercisesPage() {
       >
         <Header toggleSideBar={toggleSideBar} />
 
-        <div className="flex-1 p-5 overflow-auto bg-gray-50">
+        <div className="flex-1 p-5 overflow-auto bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
             <div>
-              <h1 className="text-2xl font-bold">Exercises Library</h1>
-              <p className="text-gray-500">
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">Exercises Library</h1>
+              <p className="text-gray-500 dark:text-gray-400 transition-colors duration-300">
                 Manage and track your exercise collection
               </p>
             </div>
@@ -225,7 +225,7 @@ export function ExercisesPage() {
                   onClick={() => {
                     setFilterCategory(category.name);
                   }}
-                  className={`px-4 py-2 rounded-full whitespace-nowrap ${
+                  className={`px-4 py-2 rounded-full whitespace-nowrap transition-colors duration-300 ${
                     filterCategory === category.name
                       ? "bg-purple-600 text-white"
                       : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
@@ -267,8 +267,8 @@ export function ExercisesPage() {
               })}
             </div>
           ) : (
-            <div className="bg-white rounded-lg p-8 text-center">
-              <p className="text-gray-500">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center transition-colors duration-300">
+              <p className="text-gray-500 dark:text-gray-400 transition-colors duration-300">
                 No exercises found in this category.
               </p>
             </div>

@@ -52,7 +52,7 @@ export function WorkoutCard({ workout, onDelete, onViewDetails, isAdmin }) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md p-5 transition-all duration-200 border border-gray-100 dark:border-gray-700 flex flex-col h-full">
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-6 transition-colors duration-300">
       <div className="flex-1">
         <div className="flex justify-between items-start mb-3">
           <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{workout.nombre}</h3>
