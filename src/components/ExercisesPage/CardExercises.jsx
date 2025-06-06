@@ -1,4 +1,15 @@
-export function CardExercises({ id, name, visibility, category, user, onDelete }) {
+import { TrashIcon, EditIcon } from "../Icons";
+
+export function CardExercises({ id, name, visibility, category, user, onDelete, onEdit }) {
+  const handleEdit = () => {
+    // Llamar a la función onEdit con los datos del ejercicio
+    onEdit({
+      id,
+      nombre: name,
+      visibilidad: visibility,
+      category: category
+    });
+  };
 
   const handleDelete = async () => {
     try {
@@ -23,7 +34,7 @@ export function CardExercises({ id, name, visibility, category, user, onDelete }
   return (
     <div
       key={id}
-      className="bg-white dark:bg-gray-800 flex flex-col justify-between rounded-lg shadow-sm hover:shadow-md p-5 transition-all duration-200 border border-gray-100 dark:border-gray-700 h-full"
+      className="group bg-white dark:bg-gray-800 flex flex-col justify-between rounded-lg shadow-sm hover:shadow-md p-5 transition-all duration-200 border border-gray-100 dark:border-gray-700 h-full"
     >
       <div className="flex-1">
         <div className="flex justify-between items-start mb-3">
@@ -59,12 +70,12 @@ export function CardExercises({ id, name, visibility, category, user, onDelete }
       
       <div className="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-700 mt-auto">
         {user && user.admin === 1 ? (
-          <div className="flex gap-3">
-            <button className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-700 dark:hover:text-blue-300">
-              Edit
+          <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-100 ease-in-out">
+            <button onClick={handleEdit} className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-700 dark:hover:text-blue-300">
+              <EditIcon with={20} height={20}/>
             </button>
             <button onClick={handleDelete} className="text-sm text-gray-500 dark:text-gray-400 hover:text-rose-700 dark:hover:text-rose-300">
-              Delete
+              <TrashIcon with={20} height={20}/>
             </button>
           </div>
         ) : <div></div>}

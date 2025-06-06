@@ -1,3 +1,5 @@
+import { TrashIcon } from "../Icons";
+
 export function WorkoutCard({ workout, onDelete, onViewDetails, isAdmin }) {
   // Función para formatear fechas
   const formatDate = (dateString) => {
@@ -81,7 +83,7 @@ export function WorkoutCard({ workout, onDelete, onViewDetails, isAdmin }) {
               onClick={handleDelete} 
               className="text-sm text-gray-500 dark:text-gray-400 hover:text-rose-700 dark:hover:text-rose-300"
             >
-              Delete
+              <TrashIcon with={20} height={20}/>
             </button>
           </div>
         )}

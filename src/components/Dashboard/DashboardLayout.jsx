@@ -15,47 +15,37 @@ export function DashboardLayout() {
         "border-green-500",
     ]
 
+    // Efecto para obtener el usuario al montar el componente
     useEffect(() => {
         const fetchUser = async () => {
             try {
                 const response = await fetch("http://localhost:3000/api/me", {
                     method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
+                    headers: { "Content-Type": "application/json" },
                     credentials: "include",
                 });
-
-                if (!response.ok) {
-                    throw new Error("Error fetching user");
-                }
-
+                if (!response.ok) throw new Error("Error fetching user");
                 const data = await response.json();
                 setUser(data.user);
             } catch (error) {
                 console.error("Error fetching user:", error);
             }
         };
-
         fetchUser();
     }, []);
 
-
+    // Efecto para obtener datos que dependen del usuario
     useEffect(() => {
+        if (!user) return;
+
         const fetchWorkouts = async () => {
             try {
                 const response = await fetch(`http://localhost:3000/recentworkouts/${user.id}`, {
                     method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
+                    headers: { "Content-Type": "application/json" },
                     credentials: "include",
                 });
-
-                if (!response.ok) {
-                    throw new Error("Error fetching workouts");
-                }
-
+                if (!response.ok) throw new Error("Error fetching workouts");
                 const data = await response.json();
                 setWorkouts(data.results || []);
             } catch (error) {
@@ -63,132 +53,90 @@ export function DashboardLayout() {
             }
         };
 
-        const fetchExercises = async () => {
-            try {
-                const response = await fetch(`http://localhost:3000/exercises/${user.id}`, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    credentials: "include",
-                });
-
-                if (!response.ok) {
-                    throw new Error("Error fetching exercises");
-                }
-
-                const data = await response.json();
-                setExercises(data.results || []);
-            } catch (error) {
-                console.error("Error loading exercises:", error);
-            }
-        }
-
-        
-        const calculateTotal = async () => {
-            const total = await totalWeightLifted();
-            setTotalWeight(total);
-        };
-
-        fetchWorkouts();
-        fetchExercises();
-
-        if (workouts.length > 0) {
-            calculateTotal();
-        }
-    }, [user]);
-
-
-    useEffect(() => {
-        const fetchStreak = async (user) => {
+        const fetchStreak = async () => {
             try {
                 const response = await fetch(`http://localhost:3000/dias-consecutivos/${user.id}`, {
                     method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
+                    headers: { "Content-Type": "application/json" },
                     credentials: "include",
                 });
-
-                if (!response.ok) {
-                    throw new Error("Error fetching streak");
-                }
-
+                if (!response.ok) throw new Error("Error fetching streak");
                 const data = await response.json();
                 setStreak(data.diasConsecutivos);
             } catch (error) {
                 console.error("Error fetching streak:", error);
             }
-        }
+        };
 
-        const fetchMostUsedExercises = async (user) => {
+        const fetchMostUsedExercises = async () => {
             try {
                 const response = await fetch(`http://localhost:3000/exercises/mostused/${user.id}`, {
                     method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
+                    headers: { "Content-Type": "application/json" },
                     credentials: "include",
                 });
-
-                if (!response.ok) {
-                    throw new Error("Error fetching most used exercises");
-                }
-
+                if (!response.ok) throw new Error("Error fetching most used exercises");
                 const data = await response.json();
                 setMostUsedExercises(data);
             } catch (error) {
                 console.error("Error fetching most used exercises:", error);
             }
-        }
+        };
 
-        if (user) {
-            fetchStreak(user)
-            fetchMostUsedExercises(user);
-        } else {
-            // Si el usuario es null (ej. no logueado o error al obtenerlo),
-            // podrías querer resetear el streak.
-            setStreak(0)
-        }
+        fetchWorkouts();
+        fetchStreak();
+        fetchMostUsedExercises();
+
     }, [user]);
 
-    const fetchExercisesWorkout = async (id) => {
-        try {
-            const response = await fetch(`http://localhost:3000/workouts/${id}`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                credentials: "include",
-            });
 
-            if (!response.ok) {
-                throw new Error("Error fetching workout details");
-            }
-
-            const data = await response.json();
-            return data.ejercicios
-        } catch (error) {
-            console.error("Error loading exercises:", error);
+    useEffect(() => {
+        if (workouts.length === 0) {
+            setTotalWeight(0); // Resetea si no hay workouts
+            return;
         }
-    }
 
-    const totalWeightLifted = async () => {
-        const allExercisesArrays = await Promise.all(
-            workouts.map((workout) => fetchExercisesWorkout(workout.id))
-        );
+        const fetchExercisesForTotalWeight = async (workoutId) => {
+            try {
+                const response = await fetch(`http://localhost:3000/workouts/details/${workoutId}`, {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "include",
+                });
+                if (!response.ok) return []; // Devuelve array vacío si hay error
+                const data = await response.json();
+                return data.ejercicios || [];
+            } catch (error) {
+                console.error(`Error fetching details for workout ${workoutId}:`, error);
+                return [];
+            }
+        };
 
-        const total = allExercisesArrays.flat().reduce((acc, exercise) => {
-            return acc + (exercise.peso * exercise.repeticiones * exercise.series);
-        }, 0);
+        const calculateTotalWeight = async () => {
+            // Hacemos todas las llamadas a la API en paralelo para obtener los detalles de cada workout
+            const allExercisesArrays = await Promise.all(
+                workouts.map((workout) => fetchExercisesForTotalWeight(workout.id))
+            );
 
-        return total;
-    };
+            // Aplanamos el array de arrays y calculamos el total
+            const total = allExercisesArrays
+                .flat() // Convierte [[ej1, ej2], [ej3]] en [ej1, ej2, ej3]
+                .reduce((acc, exercise) => {
+                    return acc + (exercise.peso * exercise.repeticiones * exercise.series);
+                }, 0);
 
+            setTotalWeight(total);
+        };
 
+        calculateTotalWeight();
+
+    }, [workouts]);
+    
     const totalExercisesDone = workouts.reduce((acc, workout) => {
         return acc + workout.numero_ejercicios;
     }, 0)
+
+    console.log(workouts)
 
     console.log(exercises)
     return (
@@ -240,7 +188,7 @@ export function DashboardLayout() {
 
             {/* Popular Exercises Section */}
             <section>
-                <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Most Used Exercises</h2>
+                <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Favorite exercises</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {mostUsedExercises.map((exercise, index) => (
                         <CardMostUsed key={exercise.ejercicio} ejercicio={exercise.ejercicio} veces_realizado={exercise.veces_realizado} color={colorsCard[index]} />

@@ -25,13 +25,7 @@ export function WorkoutDetails({ workout, onClose }) {
     return stars;
   };
 
-  return (
-    
-    <div 
-      className="fixed inset-0 z-40 bg-black bg-opacity-30"
-      onClick={onClose}
-    >
-      
+  return (  
       <div 
         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-auto z-50"
         onClick={(e) => e.stopPropagation()}
@@ -110,7 +104,6 @@ export function WorkoutDetails({ workout, onClose }) {
           </div>
         </div>
       </div>
-    </div>
   );
 }
 

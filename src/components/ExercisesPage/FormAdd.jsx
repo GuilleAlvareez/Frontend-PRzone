@@ -1,8 +1,8 @@
-export function FormAdd({ newExercise, handleInputChange, handleSubmit, categories}) {
+export function FormAdd({ newExercise, handleInputChange, handleSubmit, categories, isEditing }) {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-6">
-      <h2 className="text-xl font-semibold mb-4">Add New Exercise</h2>
+      <h2 className="text-xl font-semibold mb-4">{isEditing ? "Edit Exercise" : "Add New Exercise"}</h2>
       <form
         onSubmit={handleSubmit}
         className="grid grid-cols-1 gap-4"
@@ -56,7 +56,7 @@ export function FormAdd({ newExercise, handleInputChange, handleSubmit, categori
             type="submit"
             className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200"
           >
-            Save Exercise
+            {isEditing ? "Update Exercise" : "Save Exercise"}
           </button>
         </div>
       </form>

@@ -139,7 +139,7 @@ export function WorkoutsPage() {
       >
         <Header toggleSideBar={toggleSideBar} />
 
-        <div className="flex-1 p-5 overflow-auto bg-gray-50 dark:bg-gray-900 relative z-0">
+        <div className="flex-1 p-5 overflow-auto bg-gray-50 dark:bg-gray-900 relative">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Workouts</h1>

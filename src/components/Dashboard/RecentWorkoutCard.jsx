@@ -5,7 +5,7 @@ export function RecentWorkoutCard({ id, nombre, fecha, valoracion, numero_ejerci
 
   useEffect(() => {
     const fetchTotalLift = async () => {
-      const response = await fetch(`http://localhost:3000/workouts/${id}`, {
+      const response = await fetch(`http://localhost:3000/workouts/details/${id}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -26,7 +26,7 @@ export function RecentWorkoutCard({ id, nombre, fecha, valoracion, numero_ejerci
         setTotalLift(weight);
     }
     fetchTotalLift();
-  })
+  }, [id])
 
   function formatDate(fecha) {
     const date = new Date(fecha);

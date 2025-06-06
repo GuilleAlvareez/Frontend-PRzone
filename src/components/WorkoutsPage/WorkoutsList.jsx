@@ -58,10 +58,16 @@ export function WorkoutsList({ workouts, onDelete, user }) {
       
       {/* Modal de detalles*/}
       {selectedWorkout && (
-        <WorkoutDetails 
-          workout={selectedWorkout} 
-          onClose={closeDetails} 
-        />
+        <>
+          <div 
+            className="fixed inset-0 bg-black/65"
+            // onClick={onClose}
+          />
+          <WorkoutDetails 
+            workout={selectedWorkout} 
+            onClose={closeDetails} 
+          />
+        </>
       )}
     </>
   );

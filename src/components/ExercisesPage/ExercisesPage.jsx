@@ -17,6 +17,8 @@ export function ExercisesPage() {
   const [user, setUser] = useState(null);
   const [filterCategory, setFilterCategory] = useState("All");
   const [exercises, setExercises] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingExerciseId, setEditingExerciseId] = useState(null);
 
   const categories = [
     { id: 0, name: "All" },
@@ -63,8 +65,8 @@ export function ExercisesPage() {
   }, []);
 
   const fetchExercises = async () => {
-    if (!user || !user.id) { // Imprescindible: Evitar llamar si user no está listo
-      setExercises([]); // Opcional: limpiar ejercicios si no hay usuario
+    if (!user || !user.id) { // Evitar llamar si user no está listo
+      setExercises([]); // limpiar ejercicios si no hay usuario
       return;
     }
     try {
@@ -90,7 +92,7 @@ export function ExercisesPage() {
 
   useEffect(() => {
     fetchExercises();
-  }, [user]); // Dependencia: Ejecutar cuando 'user' cambie
+  }, [user]);
 
   const handleInputChange = async (e) => {
     const { name, value, options } = e.target;
@@ -100,6 +102,19 @@ export function ExercisesPage() {
     } else {
       setNewExercise((prev) => ({ ...prev, [name]: value }));
     }
+  };
+
+  const handleEditExercise = (exercise) => {
+    setNewExercise({
+      name: exercise.nombre,
+      visibility: exercise.visibilidad || "private",
+      category: exercise.category.map(cat => 
+        typeof cat === 'object' ? cat.id : cat
+      ).filter(id => id !== undefined)
+    });
+    setEditingExerciseId(exercise.id);
+    setIsEditing(true);
+    setShowAddForm(true);
   };
 
   const handleSubmit = async (e) => {
@@ -115,22 +130,33 @@ export function ExercisesPage() {
         category: newExercise.category
       };
       
-      const response = await fetch("http://localhost:3000/exercises/new", {
-        method: "POST",
+      let url = "http://localhost:3000/exercises/new";
+      let method = "POST";
+      
+      // Si estamos editando, cambiar URL y método
+      if (isEditing && editingExerciseId) {
+        url = `http://localhost:3000/exercises/update/${editingExerciseId}`;
+        method = "PATCH";
+      }
+      
+      const response = await fetch(url, {
+        method: method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(exerciseToSend),
         credentials: "include"
       });
 
-      if (!response.ok) throw new Error('Error al crear el ejercicio');
+      if (!response.ok) throw new Error(isEditing ? 'Error al actualizar el ejercicio' : 'Error al crear el ejercicio');
 
-      await response.json(); // Procesar respuesta si es necesario
+      await response.json();
       
       fetchExercises(); // Recargar ejercicios
       setNewExercise({ name: "", visibility: "private", category: [] });
       setShowAddForm(false);
+      setIsEditing(false);
+      setEditingExerciseId(null);
     } catch (error) {
-      console.error("Error creating exercise:", error);
+      console.error(isEditing ? "Error updating exercise:" : "Error creating exercise:", error);
     }
   };
 
@@ -154,6 +180,15 @@ export function ExercisesPage() {
     });
   }, [exercises, filterCategory]);
 
+  const handleAddExercise = () => {
+    if (showAddForm) {
+      // Si ya está abierto, lo cerramos y reseteamos el estado
+      setNewExercise({ name: "", visibility: "private", category: [] });
+      setIsEditing(false);
+      setEditingExerciseId(null);
+    }
+    setShowAddForm(!showAddForm);
+  };
 
   return (
     <div className="w-screen h-screen flex">
@@ -175,7 +210,7 @@ export function ExercisesPage() {
               </p>
             </div>
             <button
-              onClick={() => setShowAddForm(!showAddForm)}
+              onClick={handleAddExercise}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors duration-200 flex items-center justify-center gap-2 self-start"
             >
               <span>{showAddForm ? "Cancel" : "+ Add Exercise"}</span>
@@ -209,6 +244,7 @@ export function ExercisesPage() {
               handleInputChange={handleInputChange}
               handleSubmit={handleSubmit}
               categories={categories}
+              isEditing={isEditing}
             />
           )}
 
@@ -224,10 +260,11 @@ export function ExercisesPage() {
                     category={category}
                     user={user}
                     onDelete={handleExerciseDeleted}
+                    handleAddExercise={handleAddExercise}
+                    onEdit={handleEditExercise}
                   />
                 );
               })}
-
             </div>
           ) : (
             <div className="bg-white rounded-lg p-8 text-center">
