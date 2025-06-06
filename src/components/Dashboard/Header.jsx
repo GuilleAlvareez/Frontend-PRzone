@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useContext, useState, useEffect } from "react";
-import { SettingsIcon, SideBar } from "../Icons";
+import { DarkModeIcon, SideBar } from "../Icons";
 import { SidebarContext } from "../../context/SideBarContext";
 import { LogOutButton } from "../Auth/LogOutButton";
 
@@ -19,7 +19,7 @@ export function Header() {
             </div>
 
             <button className="group p-3 transition-all duration-100 ease-linear cursor-pointer">
-                <SettingsIcon width={24} height={24} className="transition-all duration-100 ease-linear group-hover:scale-110"/>
+                <DarkModeIcon width={24} height={24}/>
             </button>
         </div>
     )

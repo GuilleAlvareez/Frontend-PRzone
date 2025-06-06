@@ -38,52 +38,50 @@ export function CardExercises({ id, name, visibility, category, user, onDelete, 
     >
       <div className="flex-1">
         <div className="flex justify-between items-start mb-3">
-          <h3 className="font-semibold text-lg text-gray-900 dark:text-white">{name}</h3>
+          <h3 className="font-semibold text-lg text-gray-900 dark:text-white transition-colors duration-300">{name}</h3>
           <span
             className={`text-xs px-2 py-1 rounded-full ${
               visibility === "public"
                 ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
                 : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
-            }`}
+            } transition-colors duration-300`}
           >
             {visibility}
           </span>
         </div>
         
-        {/* Mostrar músculos trabajados */}
         {category && category.length > 0 && (
-          <div className="mb-4">
-            <div className="flex flex-wrap gap-2 items-start">
-              {category.map((muscle, index) => (
-                <div key={`${muscle.id || index}`} className="flex items-center gap-1.5 mr-1">
-                  <span className="inline-block w-2 h-2 rounded-full bg-purple-500"></span>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm m-0">
-                    {muscle.nombre || muscle.name}
-                  </p>
-                </div>
-              ))}
-            </div>
+          <div className="flex flex-wrap gap-1 mb-3">
+            {category.map((cat, index) => {
+              const categoryName = typeof cat === 'object' ? (cat.nombre || cat.name) : cat;
+              return (
+                <span
+                  key={index}
+                  className="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full transition-colors duration-300"
+                >
+                  {categoryName}
+                </span>
+              );
+            })}
           </div>
         )}
       </div>
       
-      
-      <div className="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-700 mt-auto">
+      <div className="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-700 mt-auto transition-colors duration-300">
         {user && user.admin === 1 ? (
           <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-100 ease-in-out">
-            <button onClick={handleEdit} className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-700 dark:hover:text-blue-300">
+            <button onClick={handleEdit} className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-300">
               <EditIcon with={20} height={20}/>
             </button>
-            <button onClick={handleDelete} className="text-sm text-gray-500 dark:text-gray-400 hover:text-rose-700 dark:hover:text-rose-300">
+            <button onClick={handleDelete} className="text-sm text-gray-500 dark:text-gray-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors duration-300">
               <TrashIcon with={20} height={20}/>
             </button>
           </div>
         ) : <div></div>}
-        <button className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium">
+        <button className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium transition-colors duration-300">
           View Details
         </button>
       </div>
-
     </div>
   );
 }
