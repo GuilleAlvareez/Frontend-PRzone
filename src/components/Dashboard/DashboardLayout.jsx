@@ -8,7 +8,6 @@ export function DashboardLayout() {
     const [mostUsedExercises, setMostUsedExercises] = useState([]);
     const [totalWeight, setTotalWeight] = useState(0);
     const [user, setUser] = useState(null);
-    const [streak, setStreak] = useState(0);
     const colorsCard = [
         "border-blue-500",
         "border-purple-500",
@@ -53,21 +52,6 @@ export function DashboardLayout() {
             }
         };
 
-        const fetchStreak = async () => {
-            try {
-                const response = await fetch(`http://localhost:3000/dias-consecutivos/${user.id}`, {
-                    method: "GET",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                });
-                if (!response.ok) throw new Error("Error fetching streak");
-                const data = await response.json();
-                setStreak(data.diasConsecutivos);
-            } catch (error) {
-                console.error("Error fetching streak:", error);
-            }
-        };
-
         const fetchMostUsedExercises = async () => {
             try {
                 const response = await fetch(`http://localhost:3000/exercises/mostused/${user.id}`, {
@@ -84,7 +68,6 @@ export function DashboardLayout() {
         };
 
         fetchWorkouts();
-        fetchStreak();
         fetchMostUsedExercises();
 
     }, [user]);
