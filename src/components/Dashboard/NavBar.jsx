@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useContext, useEffect, useState } from "react";
-import { Exercises, HouseIcon, Workouts, Graph } from "../Icons";
+import { Exercises, HouseIcon, Workouts, Graph, ChatIcon } from "../Icons";
 import { Link, useLocation } from "react-router-dom";
 import { SidebarContext } from "../../context/SideBarContext";
 import { LogOutButton } from "../Auth/LogOutButton";
@@ -130,6 +130,20 @@ export function NavBar() {
             >
               <Workouts width="20" height="20" className={isActive("/workouts") ? "text-green-500 dark:text-green-400" : "text-gray-500 dark:text-gray-400"} />
               <span className="font-medium">Workouts</span>
+            </Link>
+          </li>
+
+          <li>
+            <Link
+              to="/chat"
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg ${
+                isActive("/chat")
+                  ? "bg-teal-100 dark:bg-teal-900/50 text-teal-600 dark:text-teal-300"
+                  : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+              } transition-colors duration-300`}
+            >
+              <ChatIcon width="20" height="20" className={isActive("/chat") ? "text-teal-500 dark:text-teal-400" : "text-gray-500 dark:text-gray-400"} />
+              <span className="font-medium">AI Assistant</span>
             </Link>
           </li>
         </ul>

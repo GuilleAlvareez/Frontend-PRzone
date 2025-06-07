@@ -8,6 +8,7 @@ import { SidebarProvider } from './context/SideBarContext.jsx';
 import { WorkoutsPage } from './components/WorkoutsPage/WorkoutsPage.jsx';
 import { ProgressPage } from './components/ProgressPage/ProgressPage.jsx';
 import { ThemeProvider } from './context/ThemeContext';
+import { ChatPage } from './components/AIchatPage/ChatPage.jsx';
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/exercises" element={<ExercisesPage />} />
             <Route path="/workouts" element={<WorkoutsPage />} />
             <Route path="/progress" element={<ProgressPage />} />
+            <Route path="/chat" element={<ChatPage />} />
           </Routes>
         </BrowserRouter>
       </SidebarProvider>

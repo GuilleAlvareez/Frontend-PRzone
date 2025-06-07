@@ -191,8 +191,8 @@ export function ExercisesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
-      <NavBar sideBarOpen={sideBarOpen} />
+    <div className="w-screen h-screen flex bg-white dark:bg-gray-900">
+      <NavBar />
 
       <div
         className={`flex flex-col flex-1 h-full transition-all duration-300 ${
@@ -200,6 +200,7 @@ export function ExercisesPage() {
         }`}
       >
         <Header toggleSideBar={toggleSideBar} />
+
 
         <div className="flex-1 p-5 overflow-auto bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-6">
