@@ -68,7 +68,7 @@ export function CardExercises({ id, name, visibility, category, user, onDelete, 
       </div>
       
       <div className="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-700 mt-auto transition-colors duration-300">
-        {user && user.admin === 1 ? (
+        {user && (user.admin === 1 || user && visibility === user.displayUsername.toLowerCase()) ? (
           <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-100 ease-in-out">
             <button onClick={handleEdit} className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-300">
               <EditIcon with={20} height={20}/>

@@ -20,6 +20,10 @@ export function ExercisesPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editingExerciseId, setEditingExerciseId] = useState(null);
 
+  // Añadir estos estados para la paginación
+  const [currentPage, setCurrentPage] = useState(1);
+  const [exercisesPerPage] = useState(12); // Número de ejercicios por página
+
   const categories = [
     { id: 0, name: "All" },
     { id: 1, name: "Chest" },
@@ -65,12 +69,12 @@ export function ExercisesPage() {
   }, []);
 
   const fetchExercises = async () => {
-    if (!user || !user.id) { // Evitar llamar si user no está listo
+    if (!user) { // Evitar llamar si user no está listo
       setExercises([]); // limpiar ejercicios si no hay usuario
       return;
     }
     try {
-      const response = await fetch(`http://localhost:3000/exercises/${user.name}`, {
+      const response = await fetch(`http://localhost:3000/exercises/${user.displayUsername}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -180,6 +184,14 @@ export function ExercisesPage() {
     });
   }, [exercises, filterCategory]);
 
+  // Calcular los ejercicios a mostrar en la página actual
+  const indexOfLastExercise = currentPage * exercisesPerPage;
+  const indexOfFirstExercise = indexOfLastExercise - exercisesPerPage;
+  const currentExercises = filteredExercises.slice(indexOfFirstExercise, indexOfLastExercise);
+
+  // Función para cambiar de página
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   const handleAddExercise = () => {
     if (showAddForm) {
       // Si ya está abierto, lo cerramos y reseteamos el estado
@@ -225,6 +237,7 @@ export function ExercisesPage() {
                   key={category.id}
                   onClick={() => {
                     setFilterCategory(category.name);
+                    setCurrentPage(1); // Resetear a la primera página al cambiar de categoría
                   }}
                   className={`px-4 py-2 rounded-full whitespace-nowrap transition-colors duration-300 ${
                     filterCategory === category.name
@@ -250,23 +263,68 @@ export function ExercisesPage() {
           )}
 
           {exercises.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-              {filteredExercises.map(({ id, nombre, visibilidad, category }) => {
-                return (
-                  <CardExercises
-                    key={id}
-                    id={id}
-                    name={nombre}
-                    visibility={visibilidad}
-                    category={category}
-                    user={user}
-                    onDelete={handleExerciseDeleted}
-                    handleAddExercise={handleAddExercise}
-                    onEdit={handleEditExercise}
-                  />
-                );
-              })}
-            </div>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                {currentExercises.map(({ id, nombre, visibilidad, category }) => {
+                  return (
+                    <CardExercises
+                      key={id}
+                      id={id}
+                      name={nombre}
+                      visibility={visibilidad}
+                      category={category}
+                      user={user}
+                      onDelete={handleExerciseDeleted}
+                      handleAddExercise={handleAddExercise}
+                      onEdit={handleEditExercise}
+                    />
+                  );
+                })}
+              </div>
+              
+              {/* Controles de paginación */}
+              <div className="flex justify-center mt-6">
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => paginate(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className={`px-3 py-1 rounded-md ${
+                      currentPage === 1 
+                        ? "bg-gray-200 text-gray-500 cursor-not-allowed" 
+                        : "bg-purple-600 text-white hover:bg-purple-700"
+                    }`}
+                  >
+                    Prev
+                  </button>
+                  
+                  {Array.from({ length: Math.ceil(filteredExercises.length / exercisesPerPage) }).map((_, index) => (
+                    <button
+                      key={index}
+                      onClick={() => paginate(index + 1)}
+                      className={`px-3 py-1 rounded-md ${
+                        currentPage === index + 1
+                          ? "bg-purple-600 text-white"
+                          : "bg-white text-gray-700 hover:bg-gray-100"
+                      }`}
+                    >
+                      {index + 1}
+                    </button>
+                  ))}
+                  
+                  <button
+                    onClick={() => paginate(currentPage + 1)}
+                    disabled={currentPage === Math.ceil(filteredExercises.length / exercisesPerPage)}
+                    className={`px-3 py-1 rounded-md ${
+                      currentPage === Math.ceil(filteredExercises.length / exercisesPerPage)
+                        ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                        : "bg-purple-600 text-white hover:bg-purple-700"
+                    }`}
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </>
           ) : (
             <div className="bg-white dark:bg-gray-800 rounded-lg p-8 text-center transition-colors duration-300">
               <p className="text-gray-500 dark:text-gray-400 transition-colors duration-300">

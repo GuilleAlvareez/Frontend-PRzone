@@ -22,22 +22,6 @@ export function FormAdd({ newExercise, handleInputChange, handleSubmit, categori
         </div>
 
         <div className="mb-4">
-          <label htmlFor="visibility" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors duration-300">
-            Visibility
-          </label>
-          <select
-            id="visibility"
-            name="visibility"
-            value={newExercise.visibility}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-300"
-          >
-            <option value="private">Private</option>
-            <option value="public">Public</option>
-          </select>
-        </div>
-
-        <div className="mb-4">
           <label htmlFor="category" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors duration-300">
             Category
           </label>
