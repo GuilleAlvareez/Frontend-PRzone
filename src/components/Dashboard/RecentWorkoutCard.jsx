@@ -55,7 +55,7 @@ export function RecentWorkoutCard({ id, nombre, fecha, valoracion, numero_ejerci
   };
 
   return (
-    <div className="p-4 border-b border-gray-200 hover:bg-blue-50 transition-colors duration-200">
+    <div className="p-4 border-b border-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/50 transition-colors duration-200">
       <h3 className="font-semibold">
         {nombre} - {formatDate(fecha)}
       </h3>
