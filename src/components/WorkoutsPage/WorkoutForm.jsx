@@ -1,80 +1,73 @@
 import { useState } from "react";
 
-export function WorkoutForm({ onWorkoutCreated, exercises, user }) {
-  const [workout, setWorkout] = useState({
+// --- PROPS SIMPLIFICADAS ---
+// El componente ahora solo necesita saber qué hacer cuando se crea un workout (`onWorkoutCreated`)
+// y la lista de ejercicios disponibles para el selector.
+export function WorkoutForm({ onWorkoutCreated, exercises }) {
+
+  // --- ESTADO INTERNO DEL FORMULARIO ---
+  // Toda la lógica de estado ahora vive aquí, completamente encapsulada.
+  const initialWorkoutState = {
     nombre: "",
     fecha: new Date().toISOString().split("T")[0],
     valoracion: 3,
     comentarios: "",
-    ejercicios: [{ nombre_id: "", peso: "", series: "", repeticiones: "", observaciones: "" }]
-  });
+    ejercicios: [{ nombre_id: "", peso: "", series: "", repeticiones: "", observaciones: "" }],
+  };
 
+  const [workout, setWorkout] = useState(initialWorkoutState);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Maneja cambios en los inputs generales del formulario
+  // --- MANEJADORES DE EVENTOS INTERNOS ---
+  // La lógica para manipular el estado del formulario está contenida aquí.
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setWorkout({ ...workout, [name]: value });
+    setWorkout(prev => ({ ...prev, [name]: value }));
   };
 
-  // Maneja cambios en los campos de los ejercicios
   const handleExerciseChange = (index, e) => {
     const { name, value } = e.target;
     const newExercises = [...workout.ejercicios];
     newExercises[index] = { ...newExercises[index], [name]: value };
-    setWorkout({ ...workout, ejercicios: newExercises });
+    setWorkout(prev => ({ ...prev, ejercicios: newExercises }));
   };
 
-  // Añade un nuevo campo de ejercicio al formulario
   const addExercise = () => {
-    setWorkout({
-      ...workout,
+    setWorkout(prev => ({
+      ...prev,
       ejercicios: [
-        ...workout.ejercicios,
-        { nombre_id: "", peso: "", series: "", repeticiones: "", observaciones: "" }
-      ]
-    });
+        ...prev.ejercicios,
+        { nombre_id: "", peso: "", series: "", repeticiones: "", observaciones: "" },
+      ],
+    }));
   };
 
-  // Elimina un ejercicio del formulario (si hay más de uno)
   const removeExercise = (index) => {
-    if (workout.ejercicios.length === 1) return;
-
-    //Crea copia ejercicios
-    const newExercises = [...workout.ejercicios];
-    // ELimina el ejercicio en el índice especificado
-    newExercises.splice(index, 1);
-    // Actualiza el estado con los ejercicios actualizados
-    setWorkout({ ...workout, ejercicios: newExercises });
+    if (workout.ejercicios.length <= 1) return;
+    const newExercises = workout.ejercicios.filter((_, i) => i !== index);
+    setWorkout(prev => ({ ...prev, ejercicios: newExercises }));
   };
 
-  // Valida el formulario antes de enviarlo
+  // --- LÓGICA DE VALIDACIÓN Y ENVÍO ---
+  // Esta lógica también es interna del componente.
+
   const validateForm = () => {
     const newErrors = {};
+    if (!workout.nombre.trim()) newErrors.nombre = "Workout name is required";
+    if (!workout.fecha) newErrors.fecha = "Date is required";
     
-    if (!workout.nombre.trim()) {
-      newErrors.nombre = "Workout name is required";
-    }
-    
-    if (!workout.fecha) {
-      newErrors.fecha = "Date is required";
-    }
-
-    // Validar que cada ejercicio tenga datos válidos
-    const exerciseErrors = [];
-    workout.ejercicios.forEach((exercise, index) => {
-      const exerciseError = {};
-      if (!exercise.nombre_id) exerciseError.nombre_id = "Exercise is required";
-      if (!exercise.peso) exerciseError.peso = "Weight is required";
-      if (!exercise.series) exerciseError.series = "Sets are required";
-      if (!exercise.repeticiones) exerciseError.repeticiones = "Reps are required";
-      if (Object.keys(exerciseError).length > 0) {
-        exerciseErrors[index] = exerciseError;
-      }
+    const exerciseErrors = workout.ejercicios.map(ex => {
+      const err = {};
+      if (!ex.nombre_id) err.nombre_id = "Exercise is required";
+      if (!ex.peso) err.peso = "Weight is required";
+      if (!ex.series) err.series = "Sets are required";
+      if (!ex.repeticiones) err.repeticiones = "Reps are required";
+      return Object.keys(err).length > 0 ? err : null;
     });
 
-    if (exerciseErrors.length > 0) {
+    if (exerciseErrors.some(err => err !== null)) {
       newErrors.ejercicios = exerciseErrors;
     }
 
@@ -84,51 +77,22 @@ export function WorkoutForm({ onWorkoutCreated, exercises, user }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) return;
 
     setIsSubmitting(true);
+    setErrors({});
 
     try {
-      const workoutData = {
-        ...workout,
-        usuarioId: user?.id,
-        numeroEjercicios: workout.ejercicios.length
-      };
-
-      if (!workoutData.usuarioId) {
-        throw new Error("User ID is required. Please log in again.");
-      }
-
-      console.log("Enviando datos de entrenamiento:", workoutData);
-
-      const response = await fetch("http://localhost:3000/workouts/new", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(workoutData),
-        credentials: "include",
-      });
-
-      const responseData = await response.json();
-      console.log("Respuesta del servidor:", responseData);
-
-      if (!response.ok) {
-        throw new Error(responseData.message || "Error creating workout");
-      }
-
-      // Llamar a función padre para actualizar lista de entrenamientos
-      onWorkoutCreated();
-
-      // Resetear el formulario
-      setWorkout({
-        nombre: "",
-        fecha: new Date().toISOString().split("T")[0],
-        valoracion: 3,
-        comentarios: "",
-        ejercicios: [{ nombre_id: "", peso: "", series: "", repeticiones: "", observaciones: "" }]
-      });
+      // En lugar de hacer el fetch aquí, llamamos a la función que nos pasó el padre.
+      // Le pasamos los datos del formulario. El padre se encargará de añadir el `usuarioId`
+      // y llamar al hook `useWorkouts`.
+      await onWorkoutCreated(workout);
+      
+      // Reseteamos el formulario a su estado inicial.
+      setWorkout(initialWorkoutState);
 
     } catch (error) {
+      // Si `onWorkoutCreated` (que es una promesa) falla, capturamos el error.
       console.error("Error creating workout:", error);
       setErrors({ submit: error.message || "Failed to create workout. Please try again." });
     } finally {
@@ -136,7 +100,9 @@ export function WorkoutForm({ onWorkoutCreated, exercises, user }) {
     }
   };
 
-
+  // --- RENDERIZADO DEL COMPONENTE (HTML Y CSS SIN CAMBIOS) ---
+  // El JSX se mantiene idéntico, ya que sigue usando el estado y los handlers
+  // que ahora están definidos internamente en este mismo archivo.
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6 border border-gray-100 dark:border-gray-700">
       <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Add New Workout</h2>
@@ -348,5 +314,3 @@ export function WorkoutForm({ onWorkoutCreated, exercises, user }) {
     </div>
   );
 }
-
-

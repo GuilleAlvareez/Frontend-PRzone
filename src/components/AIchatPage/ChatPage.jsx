@@ -1,140 +1,70 @@
-// src/components/ChatPage/ChatPage.jsx
-import { useContext, useState, useEffect } from "react";
+import { useContext, useRef, useEffect } from "react";
 import { SidebarContext } from "../../context/SideBarContext";
 import { NavBar } from "../Dashboard/NavBar";
 import { Header } from "../Dashboard/Header";
 import { MessageList } from './MessageList';
 import { ChatInput } from './ChatInput';
 import './ChatScrollbar.css';
+import { useAuth } from "../../hooks/useAuth";
+import { useChat } from "../../hooks/useChat";
 
 export function ChatPage() {
+  const { user, isLoading: isAuthLoading } = useAuth();
+  const {
+    messages,
+    isLoading: isChatLoading, // Estado de carga para cuando el bot está "escribiendo"
+    isHistoryLoading, // Estado de carga para la carga inicial del historial
+    error: chatError,
+    sendMessage,
+    startNewConversation,
+  } = useChat(user?.id); // El hook se activa cuando `user.id` está disponible.
+
   const { sideBarOpen } = useContext(SidebarContext);
-  
-  // CAMBIO 1: El estado de los mensajes empieza VACÍO.
-  const [messages, setMessages] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [user, setUser] = useState(null);
-  
-  // CAMBIO 2: El estado de carga ahora es más simple. O está cargando o no.
-  const [isHistoryLoading, setIsHistoryLoading] = useState(true);
+
+  const chatInputRef = useRef(null);
+
+  const prevIsLoadingRef = useRef(isChatLoading);
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/api/me", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        });
-        if (response.ok) {
-          const userData = await response.json();
-          setUser(userData.user);
-        } else {
-          setUser(null);
-          setIsHistoryLoading(false);
-        }
-      } catch (error) {
-        console.error("Error fetching user:", error);
-        setUser(null);
-        setIsHistoryLoading(false);
-      }
-    };
-    fetchUserData();
-  }, []);
-
-  // CAMBIO 3: Lógica de carga de historial REFACTORIZADA y DEPENDIENTE de 'user'.
-  useEffect(() => {
-    const fetchHistory = async () => {
-      // Si no hay usuario, ponemos el mensaje de bienvenida y terminamos.
-      if (!user) {
-        setMessages([{ role: 'assistant', content: '¡Hola! Soy tu asistente de PRzone. ¿En qué puedo ayudarte hoy?' }]);
-        setIsHistoryLoading(false);
-        return;
-      }
-
-      try {
-        const response = await fetch(`http://localhost:3000/chat/history/${user.id}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include'
-        });
-
-        if (!response.ok) throw new Error('No se pudo cargar el historial.');
-
-        const history = await response.json();
-
-        if (history.length > 0) {
-          setMessages(history);
-        } else {
-          // Si el historial está vacío, ponemos el mensaje de bienvenida.
-          setMessages([{ role: 'assistant', content: '¡Hola! Soy tu asistente de PRzone. ¿En qué puedo ayudarte hoy?' }]);
-        }
-      } catch (error) {
-        console.error("Error al cargar el historial:", error);
-        // Si hay un error, también ponemos el mensaje de bienvenida.
-        setMessages([{ role: 'assistant', content: '¡Hola! Soy tu asistente de PRzone. ¿En qué puedo ayudarte hoy?' }]);
-      } finally {
-        setIsHistoryLoading(false);
-      }
-    };
-
-    // Solo ejecutamos fetchHistory si 'user' no es null.
-    // Si 'user' es null, el primer useEffect ya se encargó de la carga.
-    if (user !== null) {
-        fetchHistory();
+    // Cuando pasa de true a false (es decir, cuando la IA deja de escribir)
+    if (prevIsLoadingRef.current && !isChatLoading) {
+      chatInputRef.current?.focusInput();
     }
-  }, [user]);
+    prevIsLoadingRef.current = isChatLoading;
+  }, [isChatLoading]);
 
   const handleSendMessage = async (userMessage) => {
-    const newUserMessage = { role: 'user', content: userMessage };
-    const updatedMessages = [...messages, newUserMessage];
-    setMessages(updatedMessages);
-    setIsLoading(true);
-
     try {
-      const response = await fetch('http://localhost:3000/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: updatedMessages, userId: user?.id }),
-        credentials: 'include'
-      });
-
-      if (!response.ok) throw new Error('Error en la respuesta del servidor');
-
-      const data = await response.json();
-      
-      setMessages(prev => [...prev, { role: data.role, content: data.reply }]);
+      await sendMessage(userMessage);
     } catch (error) {
-      console.error("Error al contactar al bot:", error);
-      setMessages(prev => [...prev, { role: 'assistant', content: 'Lo siento, algo salió mal. Por favor, inténtalo de nuevo.' }]);
-    } finally {
-      setIsLoading(false);
+      console.error("Error sending message:", error);
     }
   };
 
-   const handleNewConversation = async () => {
-    if (!window.confirm("¿Estás seguro de que quieres borrar el historial y empezar una nueva conversación?")) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`http://localhost:3000/chat/history/${user.id}`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        throw new Error('No se pudo borrar el historial.');
+  const handleNewConversation = async () => {
+    if (window.confirm("¿Estás seguro de que quieres borrar el historial y empezar una nueva conversación?")) {
+      try {
+        await startNewConversation();
+      } catch (error) {
+        console.error("Error starting new conversation:", error);
+        alert("Hubo un problema al intentar borrar el historial.");
       }
-
-      setMessages([{ role: 'assistant', content: '¡Hola! Soy tu asistente de PRzone. ¿Cómo puedo ayudarte ahora?' }]);
-
-    } catch (error) {
-      console.error("Error al iniciar nueva conversación:", error);
-      alert("Hubo un problema al intentar borrar el historial. Por favor, inténtalo de nuevo.");
     }
   };
+  // Renderizado condicional para el estado de carga inicial
+  if (isAuthLoading || isHistoryLoading) {
+    return (
+      <div className="w-screen h-screen flex bg-white dark:bg-gray-900">
+        <NavBar />
+        <div className={`flex flex-col flex-1 h-full transition-all duration-300 ${sideBarOpen ? "ml-64" : "ml-0"}`}>
+          <Header />
+          <div className="flex-1 flex justify-center items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-500"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-screen h-screen flex bg-white dark:bg-gray-900">
@@ -149,6 +79,7 @@ export function ChatPage() {
               <p className="text-gray-500 dark:text-gray-400">Tu historial de conversación se guarda automáticamente.</p>
             </div>
 
+            {/* El botón solo se muestra si hay un usuario logueado */}
             {user && (
               <button
                 onClick={handleNewConversation}
@@ -161,22 +92,23 @@ export function ChatPage() {
           </div>
           
           <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full bg-white dark:bg-gray-800 rounded-lg shadow-md border dark:border-gray-700 min-h-0">
-            {isHistoryLoading ? (
-              <div className="flex-1 flex justify-center items-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-teal-500"></div>
+            {/* Si hay un error, lo mostramos */}
+            {chatError && (
+              <div className="p-4 text-center text-red-500 bg-red-100 dark:bg-red-900/50">
+                Error: {chatError.message}
               </div>
-            ) : (
-              <>
-                <MessageList 
-                  messages={messages.map(msg => ({
-                    role: msg.role,
-                    content: msg.content
-                  }))} 
-                  isLoading={isLoading} 
-                />
-                <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
-              </>
             )}
+            
+            {/* Pasamos los datos y estados del hook a los componentes hijos */}
+            <MessageList 
+              messages={messages} 
+              isLoading={isChatLoading} // Pasamos el estado de carga del bot
+            />
+            <ChatInput 
+              ref={chatInputRef}
+              onSendMessage={handleSendMessage} 
+              isLoading={isChatLoading} // Deshabilitamos el input mientras el bot responde
+            />
           </div>
         </main>
       </div>

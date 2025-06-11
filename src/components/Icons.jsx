@@ -162,7 +162,7 @@ export function TrashIcon({ width, height }) {
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth="1.5"
-        className="hover:stroke-rose-700 icon icon-tabler icons-tabler-outline icon-tabler-trash opacity-70"
+        className="hover:stroke-rose-700 dark:hover:stroke-rose-400 icon icon-tabler icons-tabler-outline icon-tabler-trash opacity-70"
         viewBox="0 0 24 24"
     >
         <path stroke="none" d="M0 0h24v24H0z"></path>

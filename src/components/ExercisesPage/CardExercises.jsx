@@ -1,6 +1,6 @@
 import { TrashIcon, EditIcon } from "../Icons";
 
-export function CardExercises({ id, name, visibility, category, user, onDelete, onEdit }) {
+export function CardExercises({ id, name, visibility, category, user, onDelete, onEdit, onViewDetails }) {
   const handleEdit = () => {
     // Llamar a la función onEdit con los datos del ejercicio
     onEdit({
@@ -10,26 +10,6 @@ export function CardExercises({ id, name, visibility, category, user, onDelete, 
       category: category
     });
   };
-
-  const handleDelete = async () => {
-    try {
-      const response = await fetch(`http://localhost:3000/exercises/delete/${id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        throw new Error("Error deleting exercise");
-      }
-
-      onDelete(id);
-    } catch (error) {
-      console.error("Error deleting exercise:", error);
-    }
-  }
 
   return (
     <div
@@ -73,12 +53,14 @@ export function CardExercises({ id, name, visibility, category, user, onDelete, 
             <button onClick={handleEdit} className="text-sm text-gray-500 dark:text-gray-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors duration-300">
               <EditIcon with={20} height={20}/>
             </button>
-            <button onClick={handleDelete} className="text-sm text-gray-500 dark:text-gray-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors duration-300">
+            <button onClick={onDelete} className="text-sm text-gray-500 dark:text-gray-400 hover:text-rose-700 dark:hover:text-rose-300 transition-colors duration-300">
               <TrashIcon with={20} height={20}/>
             </button>
           </div>
         ) : <div></div>}
-        <button className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium transition-colors duration-300">
+        <button 
+          onClick={onViewDetails}
+          className="text-sm text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 font-medium transition-colors duration-300">
           View Details
         </button>
       </div>

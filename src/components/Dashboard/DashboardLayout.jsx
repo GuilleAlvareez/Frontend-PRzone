@@ -1,176 +1,149 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { RecentWorkoutCard } from "./RecentWorkoutCard";
 import { CardMostUsed } from "./CardMostUsed";
 
+// --- NUEVOS IMPORTS DE HOOKS ---
+import { useAuth } from "../../hooks/useAuth";
+import { useWorkouts } from "../../hooks/useWorkouts";
+import { useExercises } from "../../hooks/useExercises";
+import { workoutService } from '../../services/workoutServices'; // Importamos el servicio directamente para una función específica
+
 export function DashboardLayout() {
-    const [workouts, setWorkouts] = useState([]);
-    const [exercises, setExercises] = useState([]);
-    const [mostUsedExercises, setMostUsedExercises] = useState([]);
-    const [totalWeight, setTotalWeight] = useState(0);
-    const [user, setUser] = useState(null);
-    const colorsCard = [
-        "border-blue-500",
-        "border-purple-500",
-        "border-green-500",
-    ]
+  // --- USO DE HOOKS PARA OBTENER DATOS Y LÓGICA ---
 
-    // Efecto para obtener el usuario al montar el componente
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const response = await fetch("http://localhost:3000/api/me", {
-                    method: "GET",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                });
-                if (!response.ok) throw new Error("Error fetching user");
-                const data = await response.json();
-                setUser(data.user);
-            } catch (error) {
-                console.error("Error fetching user:", error);
-            }
-        };
-        fetchUser();
-    }, []);
+  // 1. Obtenemos el usuario.
+  const { user, isLoading: isAuthLoading } = useAuth();
 
-    // Efecto para obtener datos que dependen del usuario
-    useEffect(() => {
-        if (!user) return;
+  // 2. Obtenemos los workouts recientes y el número total de workouts.
+  const { 
+    workouts, // Lista completa de workouts
+    recentWorkouts, 
+    isLoading: areWorkoutsLoading 
+  } = useWorkouts(user?.id);
 
-        const fetchWorkouts = async () => {
-            try {
-                const response = await fetch(`http://localhost:3000/recentworkouts/${user.id}`, {
-                    method: "GET",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                });
-                if (!response.ok) throw new Error("Error fetching workouts");
-                const data = await response.json();
-                setWorkouts(data.results || []);
-            } catch (error) {
-                console.error("Error loading workouts:", error);
-            }
-        };
+  // 3. Obtenemos los ejercicios más usados.
+  const { 
+    mostUsedExercises, 
+    isLoading: areExercisesLoading 
+  } = useExercises(user?.displayUsername, user?.id); // Asumiendo que useExercises también puede manejar esto.
+                               // Si no, se puede crear un hook específico o llamar al servicio.
+                               // Por simplicidad, lo he añadido a useExercises en el plan.
 
-        const fetchMostUsedExercises = async () => {
-            try {
-                const response = await fetch(`http://localhost:3000/exercises/mostused/${user.id}`, {
-                    method: "GET",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                });
-                if (!response.ok) throw new Error("Error fetching most used exercises");
-                const data = await response.json();
-                setMostUsedExercises(data);
-            } catch (error) {
-                console.error("Error fetching most used exercises:", error);
-            }
-        };
+  // --- ESTADO LOCAL DEL COMPONENTE ---
+  // Solo mantenemos el estado que es calculado o específico de este componente.
+  const [totalWeight, setTotalWeight] = useState(0);
+  const [isLoadingTotalWeight, setIsLoadingTotalWeight] = useState(false);
 
-        fetchWorkouts();
-        fetchMostUsedExercises();
+  // --- LÓGICA DE CÁLCULO (MOVIDA A UN USEEFFECT) ---
+  // Este efecto calcula el peso total levantado cuando los workouts recientes cambian.
+  useEffect(() => {
+    // Si no hay workouts recientes, el peso total es 0.
+    if (!recentWorkouts || recentWorkouts.length === 0) {
+      setTotalWeight(0);
+      return;
+    }
 
-    }, [user]);
+    const calculateTotalWeight = async () => {
+      setIsLoadingTotalWeight(true);
+      try {
+        // Hacemos todas las llamadas a la API en paralelo para obtener los detalles de cada workout reciente.
+        // Usamos el servicio directamente aquí porque es una operación muy específica del dashboard.
+        const detailsPromises = recentWorkouts.map(workout => 
+          workoutService.getWorkoutDetails(workout.id)
+        );
+        const workoutsWithDetails = await Promise.all(detailsPromises);
 
+        // Aplanamos el array de arrays de ejercicios y calculamos el total.
+        const total = workoutsWithDetails
+          .flatMap(workout => workout.ejercicios || []) // flatMap es como map seguido de flat(1)
+          .reduce((acc, exercise) => {
+            return acc + (exercise.peso * exercise.repeticiones * exercise.series);
+          }, 0);
 
-    useEffect(() => {
-        if (workouts.length === 0) {
-            setTotalWeight(0); // Resetea si no hay workouts
-            return;
-        }
+        setTotalWeight(total);
+      } catch (error) {
+        console.error("Error calculating total weight:", error);
+        setTotalWeight(0); // Resetea en caso de error
+      } finally {
+        setIsLoadingTotalWeight(false);
+      }
+    };
 
-        const fetchExercisesForTotalWeight = async (workoutId) => {
-            try {
-                const response = await fetch(`http://localhost:3000/workouts/details/${workoutId}`, {
-                    method: "GET",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                });
-                if (!response.ok) return []; // Devuelve array vacío si hay error
-                const data = await response.json();
-                return data.ejercicios || [];
-            } catch (error) {
-                console.error(`Error fetching details for workout ${workoutId}:`, error);
-                return [];
-            }
-        };
+    calculateTotalWeight();
+  }, [recentWorkouts]); // Se recalcula solo cuando cambian los workouts recientes.
 
-        const calculateTotalWeight = async () => {
-            // Hacemos todas las llamadas a la API en paralelo para obtener los detalles de cada workout
-            const allExercisesArrays = await Promise.all(
-                workouts.map((workout) => fetchExercisesForTotalWeight(workout.id))
-            );
+  // --- CÁLCULOS DERIVADOS (USANDO USEMEMO) ---
+  // useMemo es ideal para cálculos que no necesitan estado, solo dependen de otros datos.
+  const totalExercisesDone = useMemo(() => {
+    return workouts.reduce((acc, workout) => acc + workout.numero_ejercicios, 0);
+  }, [workouts]); // Se recalcula solo si la lista completa de workouts cambia.
 
-            // Aplanamos el array de arrays y calculamos el total
-            const total = allExercisesArrays
-                .flat() // Convierte [[ej1, ej2], [ej3]] en [ej1, ej2, ej3]
-                .reduce((acc, exercise) => {
-                    return acc + (exercise.peso * exercise.repeticiones * exercise.series);
-                }, 0);
+  const colorsCard = ["border-blue-500", "border-purple-500", "border-green-500"];
 
-            setTotalWeight(total);
-        };
+  // --- RENDERIZADO DEL COMPONENTE ---
+  // El renderizado ahora es más limpio y se basa en los estados de carga de los hooks.
+  const isLoading = isAuthLoading || areWorkoutsLoading || areExercisesLoading;
 
-        calculateTotalWeight();
-
-    }, [workouts]);
-    
-    const totalExercisesDone = workouts.reduce((acc, workout) => {
-        return acc + workout.numero_ejercicios;
-    }, 0)
-
-    console.log(workouts)
-
-    console.log(exercises)
+  if (isLoading) {
     return (
-        <div className="flex-1 p-5 overflow-auto bg-gray-50 dark:bg-gray-900">
-            {/* Stats Section */}
-            <section className="mb-8">
-                <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">General Statistics</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="bg-white dark:bg-gray-800 border-t-4 border-blue-500 rounded-lg p-5 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-                        <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-300">Total Weight Lifted</h3>
-                        <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">{totalWeight} kg</p>
-                        <div className="w-full h-1 bg-blue-100 dark:bg-blue-900 mt-3">
-                            <div className="h-1 bg-blue-500 w-3/4 animate-pulse"></div>
-                        </div>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 border-t-4 border-purple-500 rounded-lg p-5 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-                        <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-300">Workouts Completed</h3>
-                        <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2">{workouts.length}</p>
-                        <div className="w-full h-1 bg-purple-100 dark:bg-purple-900 mt-3">
-                            <div className="h-1 bg-purple-500 w-2/3 animate-pulse"></div>
-                        </div>
-                    </div>
-                    <div className="bg-white dark:bg-gray-800 border-t-4 border-green-500 rounded-lg p-5 shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-                        <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-300">Exercises Done</h3>
-                        <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">{totalExercisesDone}</p>
-                        <div className="w-full h-1 bg-green-100 dark:bg-green-900 mt-3">
-                            <div className="h-1 bg-green-500 w-4/5 animate-pulse"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Workouts Section */}
-            <section className="mb-8">
-                <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Recent Workouts</h2>
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-                    {workouts.map(({id, nombre, fecha, valoracion, numero_ejercicios }) => (
-                        <RecentWorkoutCard key={id} id={id} nombre={nombre} fecha={fecha} valoracion={valoracion} numero_ejercicios={numero_ejercicios} />
-                    ))}
-                </div>
-            </section>
-
-            {/* Popular Exercises Section */}
-            <section>
-                <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Favorite exercises</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {mostUsedExercises.map((exercise, index) => (
-                        <CardMostUsed key={exercise.ejercicio} ejercicio={exercise.ejercicio} veces_realizado={exercise.veces_realizado} color={colorsCard[index]} />
-                    ))}
-                </div>
-            </section>
-        </div>
+      <div className="flex-1 p-5 flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-500"></div>
+      </div>
     );
+  }
+
+  return (
+    <div className="flex-1 p-5 overflow-auto bg-gray-50 dark:bg-gray-900">
+      {/* Stats Section */}
+      <section className="mb-8">
+        <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">General Statistics</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="bg-white dark:bg-gray-800 border-t-4 border-blue-500 rounded-lg p-5 shadow-md ...">
+            <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-300">Total Weight Lifted</h3>
+            {isLoadingTotalWeight ? (
+              <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">Calculating...</p>
+            ) : (
+              <p className="text-3xl font-bold text-blue-600 dark:text-blue-400 mt-2">{totalWeight} kg</p>
+            )}
+          </div>
+          <div className="bg-white dark:bg-gray-800 border-t-4 border-purple-500 rounded-lg p-5 shadow-md ...">
+            <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-300">Workouts Completed</h3>
+            <p className="text-3xl font-bold text-purple-600 dark:text-purple-400 mt-2">{workouts.length}</p>
+          </div>
+          <div className="bg-white dark:bg-gray-800 border-t-4 border-green-500 rounded-lg p-5 shadow-md ...">
+            <h3 className="text-lg font-semibold text-gray-600 dark:text-gray-300">Exercises Done</h3>
+            <p className="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">{totalExercisesDone}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Workouts Section */}
+      <section className="mb-8">
+        <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Recent Workouts</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+          {recentWorkouts.length > 0 ? (
+            recentWorkouts.map((workout) => (
+              <RecentWorkoutCard key={workout.id} {...workout} />
+            ))
+          ) : (
+            <p className="p-4 text-gray-500">No recent workouts found.</p>
+          )}
+        </div>
+      </section>
+
+      {/* Popular Exercises Section */}
+      <section>
+        <h2 className="text-2xl font-bold mb-4 text-gray-900 dark:text-white">Favorite exercises</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {mostUsedExercises.length > 0 ? (
+            mostUsedExercises.map((exercise, index) => (
+              <CardMostUsed key={exercise.ejercicio} ejercicio={exercise.ejercicio} veces_realizado={exercise.veces_realizado} color={colorsCard[index]} />
+            ))
+          ) : (
+            <p className="p-4 text-gray-500">No favorite exercises data yet.</p>
+          )}
+        </div>
+      </section>
+    </div>
+  );
 }
