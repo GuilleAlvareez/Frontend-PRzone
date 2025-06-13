@@ -92,7 +92,6 @@ export function ChatPage() {
           </div>
           
           <div className="flex-1 flex flex-col max-w-4xl mx-auto w-full bg-white dark:bg-gray-800 rounded-lg shadow-md border dark:border-gray-700 min-h-0">
-            {/* Si hay un error, lo mostramos */}
             {chatError && (
               <div className="p-4 text-center text-red-500 bg-red-100 dark:bg-red-900/50">
                 Error: {chatError.message}

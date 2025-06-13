@@ -9,7 +9,7 @@ export function useChat(userId) {
 
   const loadHistory = useCallback(async () => {
     if (!userId) {
-      setMessages([{ role: 'assistant', content: '¡Hola! Soy tu asistente de PRzone. ¿En qué puedo ayudarte hoy?' }]);
+      setMessages([{ role: 'assistant', content: '¡Hola! Soy PR-Bot, el asistente de IA y entrenador personal integrado en la aplicación PRzone.' }]);
       setIsHistoryLoading(false);
       return;
     }
@@ -20,7 +20,7 @@ export function useChat(userId) {
       if (history && history.length > 0) {
         setMessages(history.map(msg => ({ role: msg.role, content: msg.content })));
       } else {
-        setMessages([{ role: 'assistant', content: '¡Hola! Soy tu asistente de PRzone. ¿En qué puedo ayudarte hoy?' }]);
+        setMessages([{ role: 'assistant', content: '¡Hola! Soy PR-Bot, el asistente de IA y entrenador personal integrado en la aplicación PRzone.' }]);
       }
     } catch (err) {
       setError(err);
@@ -54,12 +54,12 @@ export function useChat(userId) {
 
   const startNewConversation = useCallback(async () => {
     if (!userId) {
-      setMessages([{ role: 'assistant', content: '¡Hola! Soy tu asistente de PRzone. ¿Cómo puedo ayudarte ahora?' }]);
+      setMessages([{ role: 'assistant', content: '¡Hola! Soy PR-Bot, el asistente de IA y entrenador personal integrado en la aplicación PRzone.' }]);
       return;
     }
     try {
       await chatService.deleteChatHistory(userId);
-      setMessages([{ role: 'assistant', content: '¡Hola! Soy tu asistente de PRzone. ¿Cómo puedo ayudarte ahora?' }]);
+      setMessages([{ role: 'assistant', content: '¡Hola! Soy PR-Bot, el asistente de IA y entrenador personal integrado en la aplicación PRzone.' }]);
     } catch (err) {
       setError(err);
     }
