@@ -1,15 +1,6 @@
 import { useState, useEffect } from 'react';
 
-// --- NUEVAS PROPS ---
-// El componente ahora recibe:
-// - onSubmit: Una función que se llamará con los datos del formulario cuando se envíe.
-// - initialData: Los datos del ejercicio si estamos editando (o null si estamos creando).
-// - isEditing: Un booleano que indica si el formulario es para editar o crear.
-// - categories: La lista de categorías para el selector.
 export function FormAdd({ onSubmit, initialData, isEditing, categories }) {
-
-  // --- ESTADO INTERNO DEL FORMULARIO ---
-  // El formulario ahora gestiona su propio estado.
   const defaultFormState = {
     name: '',
     description: '',
@@ -18,9 +9,6 @@ export function FormAdd({ onSubmit, initialData, isEditing, categories }) {
 
   const [formData, setFormData] = useState(defaultFormState);
 
-  // --- EFECTO PARA RELLENAR EL FORMULARIO ---
-  // Este efecto se activa cuando el componente se monta o cuando cambian
-  // las props `initialData` o `isEditing`.
   useEffect(() => {
     // Si estamos en modo edición Y tenemos datos iniciales, llenamos el formulario.
     if (isEditing && initialData) {
@@ -34,30 +22,23 @@ export function FormAdd({ onSubmit, initialData, isEditing, categories }) {
       // Si NO estamos en modo edición (o no hay datos), reseteamos el formulario.
       setFormData(defaultFormState);
     }
-  }, [initialData, isEditing]); // Dependencias del efecto
+  }, [initialData, isEditing]);
 
-  // --- MANEJADOR DE CAMBIOS INTERNO ---
-  // Esta función ahora vive dentro del componente.
   const handleInputChange = (e) => {
     const { name, value, options } = e.target;
 
     if (name === "category") {
-      // Lógica para el selector múltiple
       const selectedCategoryIds = Array.from(options)
         .filter((opt) => opt.selected)
         .map((opt) => parseInt(opt.value, 10));
       setFormData((prev) => ({ ...prev, category: selectedCategoryIds }));
     } else {
-      // Lógica para otros inputs (incluyendo textarea)
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  // --- MANEJADOR DE ENVÍO ---
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Llama a la función `onSubmit` que le pasó el componente padre (`ExercisesPage`),
-    // enviándole los datos actuales del estado del formulario.
     onSubmit(formData);
   };
 
@@ -66,7 +47,7 @@ export function FormAdd({ onSubmit, initialData, isEditing, categories }) {
       <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white transition-colors duration-300">
         {isEditing ? "Edit Exercise" : "Add New Exercise"}
       </h2>
-      {/* El formulario ahora llama a su propio handleSubmit */}
+
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 transition-colors duration-300">
@@ -76,8 +57,8 @@ export function FormAdd({ onSubmit, initialData, isEditing, categories }) {
             type="text"
             id="name"
             name="name"
-            value={formData.name} // El valor ahora viene de su propio estado `formData`
-            onChange={handleInputChange} // Llama a su propio manejador de cambios
+            value={formData.name} 
+            onChange={handleInputChange} 
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-300"
             required
           />
@@ -106,11 +87,11 @@ export function FormAdd({ onSubmit, initialData, isEditing, categories }) {
             id="category"
             name="category"
             multiple
-            value={formData.category.map(String)} // El valor ahora viene de su propio estado `formData`
-            onChange={handleInputChange} // Llama a su propio manejador de cambios
+            value={formData.category.map(String)}
+            onChange={handleInputChange} 
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white transition-colors duration-300"
           >
-            {/* La prop `categories` sigue viniendo del padre */}
+            
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
                 {category.name}

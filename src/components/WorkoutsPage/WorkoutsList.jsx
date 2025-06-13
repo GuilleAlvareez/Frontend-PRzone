@@ -2,16 +2,13 @@ import { WorkoutCard } from "./WorkoutCard";
 import { WorkoutDetails } from "./WorkoutDetails";
 import { useState } from "react";
 
-// --- PROPS SIMPLIFICADAS ---
-// Ahora recibe los datos y las funciones directamente del hook useWorkouts,
-// pasados a través de WorkoutsPage.
 export function WorkoutsList({ 
-  workouts, 
-  selectedWorkoutDetails, // Estado del workout seleccionado (del hook)
-  isDetailsLoading,       // Estado de carga para los detalles (del hook)
-  onDelete,               // Función para borrar (del hook)
-  onViewDetails,          // Función para cargar detalles (del hook)
-  onCloseDetails          // Función para cerrar detalles (del hook)
+  workouts,
+  selectedWorkoutDetails,
+  isDetailsLoading,
+  onDelete,
+  onViewDetails,
+  onCloseDetails
 }) {
   
   const [currentPage, setCurrentPage] = useState(1);
@@ -34,32 +31,27 @@ export function WorkoutsList({
 
   return (
     <>
-      {/* Lista de entrenamientos */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         {currentworkouts.map((workout) => (
           <WorkoutCard
             key={workout.id}
             workout={workout}
-            // Pasamos las funciones directamente a la tarjeta.
-            // La lógica de confirmación y llamada al hook ya está en WorkoutsPage.
             onDelete={() => onDelete(workout.id)} 
             onViewDetails={() => onViewDetails(workout.id)}
           />
         ))}
       </div>
       
-      {/* Modal de detalles */}
-      {/* El modal se muestra si hay un workout seleccionado */}
       {selectedWorkoutDetails && (
         <>
           <div 
             className="fixed inset-0 bg-black/65 z-40"
-            onClick={onCloseDetails} // Cierra el modal al hacer clic en el fondo
+            onClick={onCloseDetails}
           />
           <WorkoutDetails 
             workout={selectedWorkoutDetails} 
             onClose={onCloseDetails} 
-            isLoading={isDetailsLoading} // Opcional: pasar estado de carga al modal
+            isLoading={isDetailsLoading}
           />
         </>
       )}
@@ -67,7 +59,6 @@ export function WorkoutsList({
       {/* Paginación */}
       {workouts.length > workoutsPerPage && (
          <div className="flex justify-center mt-6">
-              {/* Botón para ir a la página anterior */}
             <button
               onClick={() => paginate(currentPage - 1)}
               disabled={currentPage === 1}
@@ -76,7 +67,6 @@ export function WorkoutsList({
               Prev
             </button>
 
-            {/* Renderizado de los números de página */}
             {Array.from({ length: Math.ceil(workouts.length / workoutsPerPage) }, (_, index) => (
               <button
                 key={index + 1}
@@ -91,7 +81,6 @@ export function WorkoutsList({
               </button>
             ))}
 
-            {/* Botón para ir a la página siguiente */}
             <button
               onClick={() => paginate(currentPage + 1)}
               disabled={currentPage === Math.ceil(workouts.length / workoutsPerPage)}

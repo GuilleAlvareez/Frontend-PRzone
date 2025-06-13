@@ -1,10 +1,6 @@
 import { TrashIcon } from "../Icons";
 
-// Las props se mantienen casi iguales.
 export function WorkoutCard({ workout, onDelete, onViewDetails }) {
-  
-  // La lógica de formato de fecha y renderizado de estrellas no cambia,
-  // ya que es lógica de presentación pura.
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
@@ -27,11 +23,6 @@ export function WorkoutCard({ workout, onDelete, onViewDetails }) {
     return stars;
   };
 
-  // --- CAMBIO SUTIL PERO IMPORTANTE ---
-  // El handler `handleDelete` que hacía la llamada fetch se ha eliminado.
-  // El botón `onClick` ahora llama directamente a la prop `onDelete` que le pasa el padre.
-  // El padre (`WorkoutsPage`) es quien se encarga de la confirmación y de llamar al hook.
-  
   return (
     <div className="bg-white dark:bg-slate-800 flex flex-col justify-between rounded-lg shadow p-6 transition-colors duration-300">
       <div className="flex-1">
@@ -59,7 +50,6 @@ export function WorkoutCard({ workout, onDelete, onViewDetails }) {
       
       <div className="flex justify-between items-center pt-2 border-t border-gray-100 dark:border-gray-700 mt-auto">
         <div className="flex gap-3">
-          {/* El botón ahora llama directamente a la prop onDelete */}
           <button 
             onClick={onDelete} 
             className="text-sm text-gray-500 dark:text-gray-400 hover:text-rose-700 dark:hover:text-rose-300"

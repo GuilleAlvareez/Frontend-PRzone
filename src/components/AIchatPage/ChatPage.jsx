@@ -17,7 +17,7 @@ export function ChatPage() {
     error: chatError,
     sendMessage,
     startNewConversation,
-  } = useChat(user?.id); // El hook se activa cuando `user.id` está disponible.
+  } = useChat(user?.id); // El hook se activa cuando user.id está disponible.
 
   const { sideBarOpen } = useContext(SidebarContext);
 
@@ -51,7 +51,7 @@ export function ChatPage() {
       }
     }
   };
-  // Renderizado condicional para el estado de carga inicial
+  
   if (isAuthLoading || isHistoryLoading) {
     return (
       <div className="w-screen h-screen flex bg-white dark:bg-gray-900">
@@ -99,15 +99,14 @@ export function ChatPage() {
               </div>
             )}
             
-            {/* Pasamos los datos y estados del hook a los componentes hijos */}
             <MessageList 
               messages={messages} 
-              isLoading={isChatLoading} // Pasamos el estado de carga del bot
+              isLoading={isChatLoading}
             />
             <ChatInput 
               ref={chatInputRef}
               onSendMessage={handleSendMessage} 
-              isLoading={isChatLoading} // Deshabilitamos el input mientras el bot responde
+              isLoading={isChatLoading}
             />
           </div>
         </main>

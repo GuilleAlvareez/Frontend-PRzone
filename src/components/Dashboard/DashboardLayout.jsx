@@ -6,38 +6,27 @@ import { CardMostUsed } from "./CardMostUsed";
 import { useAuth } from "../../hooks/useAuth";
 import { useWorkouts } from "../../hooks/useWorkouts";
 import { useExercises } from "../../hooks/useExercises";
-import { workoutService } from '../../services/workoutServices'; // Importamos el servicio directamente para una función específica
+import { workoutService } from '../../services/workoutServices';
 
 export function DashboardLayout() {
-  // --- USO DE HOOKS PARA OBTENER DATOS Y LÓGICA ---
-
-  // 1. Obtenemos el usuario.
   const { user, isLoading: isAuthLoading } = useAuth();
 
-  // 2. Obtenemos los workouts recientes y el número total de workouts.
   const { 
-    workouts, // Lista completa de workouts
+    workouts,
     recentWorkouts, 
     isLoading: areWorkoutsLoading 
   } = useWorkouts(user?.id);
 
-  // 3. Obtenemos los ejercicios más usados.
   const { 
     mostUsedExercises, 
     isLoading: areExercisesLoading 
-  } = useExercises(user?.displayUsername, user?.id); // Asumiendo que useExercises también puede manejar esto.
-                               // Si no, se puede crear un hook específico o llamar al servicio.
-                               // Por simplicidad, lo he añadido a useExercises en el plan.
+  } = useExercises(user?.displayUsername, user?.id);
 
-  // --- ESTADO LOCAL DEL COMPONENTE ---
-  // Solo mantenemos el estado que es calculado o específico de este componente.
   const [totalWeight, setTotalWeight] = useState(0);
   const [isLoadingTotalWeight, setIsLoadingTotalWeight] = useState(false);
 
-  // --- LÓGICA DE CÁLCULO (MOVIDA A UN USEEFFECT) ---
   // Este efecto calcula el peso total levantado cuando los workouts recientes cambian.
   useEffect(() => {
-    // Si no hay workouts recientes, el peso total es 0.
     if (!recentWorkouts || recentWorkouts.length === 0) {
       setTotalWeight(0);
       return;
@@ -46,8 +35,7 @@ export function DashboardLayout() {
     const calculateTotalWeight = async () => {
       setIsLoadingTotalWeight(true);
       try {
-        // Hacemos todas las llamadas a la API en paralelo para obtener los detalles de cada workout reciente.
-        // Usamos el servicio directamente aquí porque es una operación muy específica del dashboard.
+        // Hacemos todas las llamadas a la API para obtener los detalles de cada workout reciente.
         const detailsPromises = recentWorkouts.map(workout => 
           workoutService.getWorkoutDetails(workout.id)
         );
@@ -55,7 +43,7 @@ export function DashboardLayout() {
 
         // Aplanamos el array de arrays de ejercicios y calculamos el total.
         const total = workoutsWithDetails
-          .flatMap(workout => workout.ejercicios || []) // flatMap es como map seguido de flat(1)
+          .flatMap(workout => workout.ejercicios || [])
           .reduce((acc, exercise) => {
             return acc + (exercise.peso * exercise.repeticiones * exercise.series);
           }, 0);
@@ -63,7 +51,7 @@ export function DashboardLayout() {
         setTotalWeight(total);
       } catch (error) {
         console.error("Error calculating total weight:", error);
-        setTotalWeight(0); // Resetea en caso de error
+        setTotalWeight(0);
       } finally {
         setIsLoadingTotalWeight(false);
       }
@@ -72,16 +60,12 @@ export function DashboardLayout() {
     calculateTotalWeight();
   }, [recentWorkouts]); // Se recalcula solo cuando cambian los workouts recientes.
 
-  // --- CÁLCULOS DERIVADOS (USANDO USEMEMO) ---
-  // useMemo es ideal para cálculos que no necesitan estado, solo dependen de otros datos.
   const totalExercisesDone = useMemo(() => {
     return workouts.reduce((acc, workout) => acc + workout.numero_ejercicios, 0);
   }, [workouts]); // Se recalcula solo si la lista completa de workouts cambia.
 
   const colorsCard = ["border-blue-500", "border-purple-500", "border-green-500"];
 
-  // --- RENDERIZADO DEL COMPONENTE ---
-  // El renderizado ahora es más limpio y se basa en los estados de carga de los hooks.
   const isLoading = isAuthLoading || areWorkoutsLoading || areExercisesLoading;
 
   if (isLoading) {

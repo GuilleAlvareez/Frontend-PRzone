@@ -4,23 +4,14 @@ import { NavBar } from "../Dashboard/NavBar";
 import { Header } from "../Dashboard/Header";
 import ChartComponent from "./ChartComponent";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-// --- NUEVOS IMPORTS DE HOOKS ---
 import { useAuth } from "@/hooks/useAuth";
 import { useExercises } from "@/hooks/useExercises";
 import { useProgress } from "@/hooks/useProgress";
 
 export function ProgressPage() {
-  // --- USO DE HOOKS PARA OBTENER DATOS Y LÓGICA ---
-
-  // 1. Obtenemos el usuario para saber qué lista de ejercicios cargar.
   const { user, isLoading: isAuthLoading } = useAuth();
-
-  // 2. Obtenemos la lista de ejercicios disponibles para el selector.
-  //    El hook se encarga de la carga y los errores.
   const { exercises, isLoading: areExercisesLoading } = useExercises(user?.displayUsername, user?.id);
 
-  // 3. Usamos el hook de progreso para obtener los datos del gráfico y la función para cargarlos.
   const {
     exerciseProgressData,
     isLoading: isProgressLoading,
@@ -28,12 +19,8 @@ export function ProgressPage() {
     fetchExerciseProgress,
   } = useProgress();
 
-  // --- ESTADO LOCAL DEL COMPONENTE (UI) ---
-  // Solo necesitamos estado para la UI: el ejercicio seleccionado y el estado del sidebar.
   const { sideBarOpen } = useContext(SidebarContext);
   const [selectedExerciseId, setSelectedExerciseId] = useState(null);
-
-  // --- EFECTOS PARA COORDINAR LOS HOOKS ---
 
   // Efecto para seleccionar el primer ejercicio de la lista una vez que se carga.
   useEffect(() => {
@@ -47,17 +34,12 @@ export function ProgressPage() {
     if (selectedExerciseId) {
       fetchExerciseProgress(selectedExerciseId);
     }
-  }, [selectedExerciseId, fetchExerciseProgress]); // fetchExerciseProgress está memorizado con useCallback en el hook
+  }, [selectedExerciseId, fetchExerciseProgress]);
 
-  // --- MANEJADORES DE EVENTOS (HANDLERS) ---
   const handleExerciseChange = (value) => {
-    // El valor del Select de shadcn/ui ya es el `id` del ejercicio.
     setSelectedExerciseId(value);
   };
 
-  // --- RENDERIZADO DEL COMPONENTE ---
-
-  // Estado de carga principal mientras se obtienen los datos iniciales.
   if (isAuthLoading || areExercisesLoading) {
     return (
       <div className="w-screen h-screen flex bg-white dark:bg-gray-900">
@@ -107,7 +89,6 @@ export function ProgressPage() {
             </Select>
           </div>
 
-          {/* Renderizado condicional para el gráfico */}
           {isProgressLoading ? (
             <div className="text-center p-10">Cargando progreso...</div>
           ) : progressError ? (

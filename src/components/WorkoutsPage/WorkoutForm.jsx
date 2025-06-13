@@ -1,12 +1,6 @@
 import { useState } from "react";
 
-// --- PROPS SIMPLIFICADAS ---
-// El componente ahora solo necesita saber qué hacer cuando se crea un workout (`onWorkoutCreated`)
-// y la lista de ejercicios disponibles para el selector.
 export function WorkoutForm({ onWorkoutCreated, exercises }) {
-
-  // --- ESTADO INTERNO DEL FORMULARIO ---
-  // Toda la lógica de estado ahora vive aquí, completamente encapsulada.
   const initialWorkoutState = {
     nombre: "",
     fecha: new Date().toISOString().split("T")[0],
@@ -18,9 +12,6 @@ export function WorkoutForm({ onWorkoutCreated, exercises }) {
   const [workout, setWorkout] = useState(initialWorkoutState);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // --- MANEJADORES DE EVENTOS INTERNOS ---
-  // La lógica para manipular el estado del formulario está contenida aquí.
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -49,9 +40,6 @@ export function WorkoutForm({ onWorkoutCreated, exercises }) {
     const newExercises = workout.ejercicios.filter((_, i) => i !== index);
     setWorkout(prev => ({ ...prev, ejercicios: newExercises }));
   };
-
-  // --- LÓGICA DE VALIDACIÓN Y ENVÍO ---
-  // Esta lógica también es interna del componente.
 
   const validateForm = () => {
     const newErrors = {};
@@ -83,16 +71,12 @@ export function WorkoutForm({ onWorkoutCreated, exercises }) {
     setErrors({});
 
     try {
-      // En lugar de hacer el fetch aquí, llamamos a la función que nos pasó el padre.
-      // Le pasamos los datos del formulario. El padre se encargará de añadir el `usuarioId`
-      // y llamar al hook `useWorkouts`.
       await onWorkoutCreated(workout);
       
       // Reseteamos el formulario a su estado inicial.
       setWorkout(initialWorkoutState);
 
     } catch (error) {
-      // Si `onWorkoutCreated` (que es una promesa) falla, capturamos el error.
       console.error("Error creating workout:", error);
       setErrors({ submit: error.message || "Failed to create workout. Please try again." });
     } finally {
@@ -100,9 +84,6 @@ export function WorkoutForm({ onWorkoutCreated, exercises }) {
     }
   };
 
-  // --- RENDERIZADO DEL COMPONENTE (HTML Y CSS SIN CAMBIOS) ---
-  // El JSX se mantiene idéntico, ya que sigue usando el estado y los handlers
-  // que ahora están definidos internamente en este mismo archivo.
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 mb-6 border border-gray-100 dark:border-gray-700">
       <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Add New Workout</h2>

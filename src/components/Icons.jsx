@@ -182,7 +182,7 @@ export function EditIcon({ width, height }) {
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth="2"
-            className="hover:stroke-blue-700 icon icon-tabler icons-tabler-outline icon-tabler-edit opacity-70"
+            className="hover:stroke-blue-700 dark:hover:stroke-blue-400 icon icon-tabler icons-tabler-outline icon-tabler-edit opacity-70"
             viewBox="0 0 24 24"
         >
             <path stroke="none" d="M0 0h24v24H0z"></path>

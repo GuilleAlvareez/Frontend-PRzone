@@ -32,14 +32,11 @@ export function useExercises(username, userId) {
       setMostUsedExercises([]);
       return;
     }
-    // No manejamos isLoading aquí para no interferir con la carga principal,
-    // ya que se llaman juntas. Si se necesitaran cargas independientes,
-    // se requerirían estados de carga separados.
+
     try {
       const data = await exerciseServices.getMostUsedExercises(userId);
       setMostUsedExercises(data || []);
     } catch (err) {
-      // Podríamos tener un estado de error separado si quisiéramos
       console.error("Error fetching most used exercises:", err);
       setMostUsedExercises([]);
     }
@@ -96,5 +93,9 @@ export function useExercises(username, userId) {
       }
     }, []);
 
-  return { exercises, isLoading, error, selectedExerciseDetails, addExercise, updateExistingExercise, removeExercise, fetchExerciseDetails, refreshExercises: fetchExercises, mostUsedExercises, refreshMostUsed: fetchMostUsed };
+    const clearExerciseDetails = useCallback(() => {
+    setSelectedExerciseDetails(null);
+  }, []);
+
+  return { exercises, isLoading, error, selectedExerciseDetails, addExercise, updateExistingExercise, removeExercise, fetchExerciseDetails, refreshExercises: fetchExercises, mostUsedExercises, refreshMostUsed: fetchMostUsed, clearExerciseDetails };
 }

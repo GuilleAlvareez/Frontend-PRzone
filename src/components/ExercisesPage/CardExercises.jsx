@@ -26,7 +26,7 @@ export function CardExercises({ id, name, visibility, category, user, onDelete, 
                 : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
             } transition-colors duration-300`}
           >
-            {visibility}
+            {visibility === "public" ? "Public" : "Private"}
           </span>
         </div>
         

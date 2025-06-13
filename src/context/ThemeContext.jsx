@@ -40,7 +40,6 @@ export function ThemeProvider({ children }) {
   );
 }
 
-// Hook personalizado para facilitar el uso del contexto
 export function useTheme() {
   return useContext(ThemeContext);
 }

@@ -38,4 +38,12 @@ export const exerciseServices = {
     }
     return apiClient(`/exercises/progress/${exerciseId}`);
   },
+
+  getExerciseDetails: async (exerciseId) => {
+    if (!exerciseId) {
+      console.warn('getExerciseDetails: exerciseId is required');
+      return Promise.resolve([]);
+    }
+    return apiClient(`/exercises/details/${exerciseId}`);
+  },
 };

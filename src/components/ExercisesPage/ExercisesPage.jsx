@@ -4,33 +4,32 @@ import { NavBar } from "../Dashboard/NavBar";
 import { Header } from "../Dashboard/Header";
 import { CardExercises } from "./CardExercises";
 import { FormAdd } from "./FormAdd";
+import { ExercisesDetails } from "./ExercisesDetails";
 import { useAuth } from "../../hooks/useAuth";
-import { useExercises } from "@/hooks/useExercises";
+import { useExercises } from "../../hooks/useExercises";
 
 export function ExercisesPage() {
-  // --- 1. USO DE HOOKS ---
   const { user, isLoading: isAuthLoading } = useAuth();
   const {
     exercises,
     isLoading: areExercisesLoading,
     error: exercisesError,
+    selectedExerciseDetails,
     addExercise,
     removeExercise,
     updateExistingExercise,
     fetchExerciseDetails,
+    clearExerciseDetails,
   } = useExercises(user?.displayUsername, user?.id);
 
-  // --- 2. ESTADO LOCAL DE UI ---
   const { sideBarOpen } = useContext(SidebarContext);
   const [showAddForm, setShowAddForm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editingExercise, setEditingExercise] = useState(null); // Guarda el ejercicio a editar
+  const [editingExercise, setEditingExercise] = useState(null);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [filterCategory, setFilterCategory] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [exercisesPerPage] = useState(12);
-
-  // --- 3. MANEJADORES DE EVENTOS (HANDLERS) ---
-  // Esta es la lógica que conecta la UI con los hooks
 
   const handleToggleForm = () => {
     if (showAddForm) {
@@ -47,16 +46,12 @@ export function ExercisesPage() {
   };
 
   const handleSubmitForm = async (formData) => {
-    // formData es un objeto como { name: '...', category: [...] } que viene de FormAdd
     try {
       if (isEditing) {
-        // Llamamos a la función de actualización del hook
         await updateExistingExercise(editingExercise.id, formData);
       } else {
-        // Llamamos a la función de añadir del hook
         await addExercise(formData);
       }
-      // Cerramos y reseteamos el formulario en caso de éxito
       setShowAddForm(false);
       setIsEditing(false);
       setEditingExercise(null);
@@ -68,16 +63,25 @@ export function ExercisesPage() {
 
   const handleDeleteClick = async (exerciseId) => {
     if (window.confirm("Are you sure you want to delete this exercise?")) {
-        try {
-            // Llamamos a la función de borrado del hook
-            await removeExercise(exerciseId);
-        } catch (error) {
-            console.error("Failed to delete exercise:", error);
-        }
+      try {
+        await removeExercise(exerciseId);
+      } catch (error) {
+        console.error("Failed to delete exercise:", error);
+        alert(`Error al borrar el ejercicio: ${error.message}`);
+      }
     }
   };
 
-  // --- 4. LÓGICA DE FILTRADO Y PAGINACIÓN ---
+  const handleViewDetailsClick = async (exerciseId) => {
+    await fetchExerciseDetails(exerciseId);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleCloseDetailsModal = () => {
+    setIsDetailsModalOpen(false);
+    clearExerciseDetails();
+  };
+
   const filteredExercises = useMemo(() => {
     if (filterCategory === "All") return exercises;
     return exercises.filter(exercise => 
@@ -122,7 +126,11 @@ export function ExercisesPage() {
                 <button
                   key={category.id}
                   onClick={() => { setFilterCategory(category.name); setCurrentPage(1); }}
-                  className={`px-4 py-2 rounded-full ... ${filterCategory === category.name ? "bg-purple-600 text-white" : "..."}`}
+                  className={`px-4 py-2 rounded-full whitespace-nowrap transition-colors duration-300 ${
+                    filterCategory === category.name
+                      ? "bg-purple-600 text-white"
+                      : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                  }`}
                 >
                   {category.name}
                 </button>
@@ -133,7 +141,7 @@ export function ExercisesPage() {
           {showAddForm && (
             <FormAdd
               onSubmit={handleSubmitForm}
-              initialData={editingExercise ?? { name: "", category: [] }}
+              initialData={editingExercise}
               isEditing={isEditing}
               categories={categories.filter(c => c.id !== 0)}
             />
@@ -154,9 +162,9 @@ export function ExercisesPage() {
                       visibility={exercise.visibilidad}
                       category={exercise.category}
                       user={user}
-                      onDelete={() => handleDeleteClick(exercise.id)} // Conectado al nuevo handler
-                      onEdit={() => handleEditClick(exercise)} // Conectado al nuevo handler
-                      onViewDetails={() => fetchExerciseDetails(exercise.id)}
+                      onDelete={() => handleDeleteClick(exercise.id)}
+                      onEdit={() => handleEditClick(exercise)}
+                      onViewDetails={() => handleViewDetailsClick(exercise.id)}
                     />
                   ))}
                 </div>
@@ -165,10 +173,9 @@ export function ExercisesPage() {
                   <p className="text-gray-500 dark:text-gray-400">No exercises found in this category.</p>
                 </div>
               )}
-              {/* Paginación */}
+              
               {filteredExercises.length > exercisesPerPage && (
-                 <div className="flex justify-center mt-6">
-                      {/* Botón para ir a la página anterior */}
+                 <div className="flex justify-center items-center mt-8 space-x-2">
                     <button
                       onClick={() => paginate(currentPage - 1)}
                       disabled={currentPage === 1}
@@ -176,8 +183,6 @@ export function ExercisesPage() {
                     >
                       Prev
                     </button>
-
-                    {/* Renderizado de los números de página */}
                     {Array.from({ length: Math.ceil(filteredExercises.length / exercisesPerPage) }, (_, index) => (
                       <button
                         key={index + 1}
@@ -191,8 +196,6 @@ export function ExercisesPage() {
                         {index + 1}
                       </button>
                     ))}
-
-                    {/* Botón para ir a la página siguiente */}
                     <button
                       onClick={() => paginate(currentPage + 1)}
                       disabled={currentPage === Math.ceil(filteredExercises.length / exercisesPerPage)}
@@ -200,8 +203,23 @@ export function ExercisesPage() {
                     >
                       Next
                     </button>
-                 </div>
+                  </div>
               )}
+            </>
+          )}
+
+          {isDetailsModalOpen && (
+            <>
+              <div 
+                className="fixed inset-0 bg-black/65 z-40"
+                onClick={handleCloseDetailsModal}
+              />
+              <ExercisesDetails 
+                title={selectedExerciseDetails?.nombre}
+                description={selectedExerciseDetails?.descripcion || "No description provided for this exercise."}
+                onClose={handleCloseDetailsModal}
+                isLoading={areExercisesLoading}
+              />
             </>
           )}
         </div>
