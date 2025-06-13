@@ -14,12 +14,12 @@ export function FormAdd({ onSubmit, initialData, isEditing, categories }) {
     if (isEditing && initialData) {
       setFormData({
         name: initialData.nombre || '', // Rellena con el nombre del ejercicio a editar
-        description: initialData.description || '', // Rellena con la descripción del ejercicio a editar
+        description: initialData.descripcion || '', // Rellena con la descripción del ejercicio a editar
         // Mapeamos las categorías para asegurarnos de que solo tenemos los IDs
         category: initialData.category?.map(cat => cat.id) || [],
       });
     } else {
-      // Si NO estamos en modo edición (o no hay datos), reseteamos el formulario.
+      // Si no estamos en modo edición (o no hay datos), reseteamos el formulario.
       setFormData(defaultFormState);
     }
   }, [initialData, isEditing]);

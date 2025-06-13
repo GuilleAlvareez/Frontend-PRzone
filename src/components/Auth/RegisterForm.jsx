@@ -30,7 +30,6 @@ export function RegisterForm() {
     try {
       await register(userData);
       
-      alert("¡Registro exitoso! Ahora puedes iniciar sesión.");
       navigate('/login');
 
     } catch (err) {
