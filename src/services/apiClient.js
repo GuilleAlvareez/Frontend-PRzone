@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:3000'; // URL de tu backend
+const BASE_URL = 'https://backend-przone.onrender.com'; 
 
 export default async function apiClient(endpoint, { body, ...customConfig } = {}) {
   const headers = { 'Content-Type': 'application/json' };
