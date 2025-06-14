@@ -30,6 +30,11 @@ export function useAuth() {
     try {
       const response = await authService.login(credentials);
       setUser(response.user);
+
+      if (response.token) {
+        localStorage.setItem('authToken', response.token); // <-- GUARDAR TOKEN
+      }
+
       return response;
     } catch (err) {
       setUser(null);
@@ -59,6 +64,7 @@ export function useAuth() {
     try {
       await authService.logout();
       setUser(null);
+      localStorage.removeItem('authToken');
     } catch (err) {
       setError(err);
       setUser(null);

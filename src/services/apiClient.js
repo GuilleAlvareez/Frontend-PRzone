@@ -3,6 +3,11 @@ const BASE_URL = 'https://backend-przone.onrender.com';
 export default async function apiClient(endpoint, { body, ...customConfig } = {}) {
   const headers = { 'Content-Type': 'application/json' };
 
+  const token = localStorage.getItem('authToken');
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  
   const config = {
     method: body ? 'POST' : 'GET',
     ...customConfig,
