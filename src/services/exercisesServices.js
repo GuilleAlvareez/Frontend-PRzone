@@ -14,8 +14,6 @@ export const exerciseServices = {
   },
 
   updateExercise: async (exerciseId, exerciseData) => {
-    console.log("Updating exercise with ID:", exerciseId);
-    console.log("Exercise data:", exerciseData);
     return apiClient(`/exercises/update/${exerciseId}`, { body: exerciseData, method: 'PATCH' });
   },
   
