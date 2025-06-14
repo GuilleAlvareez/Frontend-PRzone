@@ -1,0 +1,75 @@
+.range-switcher-chart-wrapper {
+    background-color: transparent; /* Fondo negro general para el componente */
+    color: #d1d4dc; /* Color de texto claro */
+    padding: 20px;
+    border-radius: 8px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.range-switcher-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.range-switcher-header h2 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.get-chart-button {
+    background-color: #2a2e39;
+    color: #b2b5be;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.get-chart-button:hover {
+    background-color: #3c404c;
+}
+
+.range-buttons {
+    margin-bottom: 15px;
+    background-color: #1e222d; /* Un poco más claro que el fondo del chart */
+    padding: 4px;
+    border-radius: 4px;
+    display: inline-flex; /* Para que el contenedor se ajuste al contenido */
+}
+
+.range-button {
+    background-color: transparent;
+    color: #b2b5be;
+    border: none;
+    padding: 6px 12px;
+    margin: 0 2px; /* Pequeño margen entre botones */
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.range-button.active {
+    background-color: #2962FF; /* Azul similar al de la línea */
+    color: white;
+}
+
+.range-button:not(.active):hover {
+    background-color: #2a2e39;
+}
+
+.chart-container {
+    width: 100%;
+    height: 400px; /* Ajusta la altura según tus necesidades */
+    border-radius: 4px; /* Bordes redondeados para el contenedor del chart */
+    overflow: hidden; /* Para que el chart respete los bordes redondeados */
+}
+
+.tv-lightweight-charts svg,
+.tv-lightweight-charts a {
+    display: none;
+}
