@@ -4,50 +4,17 @@ import { Exercises, HouseIcon, Workouts, Graph, ChatIcon } from "../Icons";
 import { Link, useLocation } from "react-router-dom";
 import { SidebarContext } from "../../context/SideBarContext";
 import { LogOutButton } from "../Auth/LogOutButton";
+import { useAuth } from "../../hooks/useAuth";
 
 export function NavBar() {
+  const { user, isLoading, logout } = useAuth();
   const { sideBarOpen } = useContext(SidebarContext);
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
 
-  const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
 
-  const fetchUser = async () => {
-    setError(null);
-    try {
-      const response = await fetch("http://localhost:3000/api/me", {
-        method: "GET",
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        const userData = await response.json();
-        setUser(userData);
-      } else if (response.status === 401) {
-        setUser(null);
-      } else {
-        setError(`Error ${response.status}: ${response.statusText}`);
-        setUser(null);
-      }
-    } catch (err) {
-      console.error("Error fetching user:", err);
-      setError("No se pudo conectar con el servidor.");
-      setUser(null);
-    }
-  };
-
-  useEffect(() => {
-    fetchUser();
-  }, []);
-
-  const cleanUser = () => {
-    setUser(null);
-  };
   return (
     <nav
       className={`fixed top-0 left-0 z-50 h-full w-64 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-gray-700 shadow-md transform transition-transform duration-300 ease-in-out ${
@@ -148,7 +115,7 @@ export function NavBar() {
           </li>
         </ul>
 
-        <LogOutButton handle={cleanUser} />
+        <LogOutButton handle={logout} />
       </div>
     </nav>
   );
