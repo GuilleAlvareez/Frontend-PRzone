@@ -1,33 +1,4 @@
-import { useEffect, useState } from "react";
-
-export function RecentWorkoutCard({ id, nombre, fecha, valoracion, numero_ejercicios}) {
-  const [totalLift, setTotalLift] = useState(0);
-
-  useEffect(() => {
-    const fetchTotalLift = async () => {
-      const response = await fetch(`http://localhost:3000/workouts/details/${id}`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          credentials: "include",
-        });
-
-        if (!response.ok) {
-          throw new Error("Error fetching workout details");
-        }
-
-        const data = await response.json();
-        let weight = 0;
-
-        data.ejercicios.forEach((exercise) => {
-          weight += exercise.peso * exercise.repeticiones * exercise.series;
-        });
-        setTotalLift(weight);
-    }
-    fetchTotalLift();
-  }, [id])
-
+export function RecentWorkoutCard({ nombre, fecha, valoracion, numero_ejercicios}) {
   function formatDate(fecha) {
     const date = new Date(fecha);
     const year = date.getFullYear();
