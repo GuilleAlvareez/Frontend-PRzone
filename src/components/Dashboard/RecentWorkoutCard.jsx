@@ -60,8 +60,7 @@ export function RecentWorkoutCard({ id, nombre, fecha, valoracion, numero_ejerci
         {nombre} - {formatDate(fecha)}
       </h3>
       <p className="text-gray-600">
-        Rate: {renderRating(valoracion)} • {numero_ejercicios} exercises • {totalLift}
-        kg total
+        Rate: {renderRating(valoracion)} • {numero_ejercicios} exercises
       </p>
     </div>
   );
